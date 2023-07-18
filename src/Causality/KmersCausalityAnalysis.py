@@ -1,4 +1,4 @@
-from TS.TimeSeriesBuilder import TimeSeriesBuilder
+from TS.SimpleTimeSeriesBuilder import SimpleTimeSeriesBuilder
 from User.UserType import UserType
 from Causality.CausalityAnalysisTool import *
 
@@ -8,10 +8,10 @@ from typing import List
 
 class KmersCausalityAnalysis:
     # Attributes
-    ts_builder: TimeSeriesBuilder
+    ts_builder: SimpleTimeSeriesBuilder
     lags: List[int]
 
-    def __init__(self, ts_builder: TimeSeriesBuilder, lags: List[int]):
+    def __init__(self, ts_builder: SimpleTimeSeriesBuilder, lags: List[int]):
         self.ts_builder = ts_builder
         self.lags = lags
 

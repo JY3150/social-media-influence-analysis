@@ -5,6 +5,9 @@ from typing import Dict, Any, Set
 
 
 class ContentTypeMapping(ABC):
+    """
+    A parent class for all ContentType mapping.
+    """
 
     tweet_to_type: Dict[int, ContentType]  # tweet id to ContentType
 

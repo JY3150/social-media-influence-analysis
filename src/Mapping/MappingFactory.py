@@ -17,6 +17,8 @@ class MappingFactory:
         self.division_type = division_type
 
     def get_cluster(self, args: Dict[str, Any]) -> ContentTypeMapping:
+        """Return ContentTypeMapping object by self.division_type.
+        """
         try:
             if self.division_type == "kmers":
                 return KmersMapping(args)

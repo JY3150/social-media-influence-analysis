@@ -1,7 +1,5 @@
-import numpy as np
-
 from Aggregation.ContentSpace import ContentSpace
-from TS.TimeSeriesBuilder import TimeSeriesBuilder
+from TS.TimeSeriesBuilderBase import TimeSeriesBuilderBase
 from User.UserType import UserType
 from Causality.CausalityAnalysisTool import *
 
@@ -11,13 +9,13 @@ from typing import List, Dict
 class AggregateCausalityAnalysis:
     # Attributes
     space: ContentSpace
-    ts_builder: TimeSeriesBuilder
+    ts_builder: TimeSeriesBuilderBase
     lags: List[int]
 
     supply: List[int]
     demand: List[int]
 
-    def __init__(self, space: ContentSpace, ts_builder: TimeSeriesBuilder,
+    def __init__(self, space: ContentSpace, ts_builder: TimeSeriesBuilderBase,
                  lags: List[int]):
         self.space = space
         self.ts_builder = ts_builder

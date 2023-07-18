@@ -3,10 +3,14 @@ import numpy as np
 
 
 def identity(x: Sequence) -> Sequence:
+    """identity function.
+    """
     return x
 
 
 def sma(x: Sequence, window: int) -> Sequence:
+    """Simple Moving Average function.
+    """
     # Note that <window> should be an odd number
     # if not isinstance(window, int) or window % 2 != 1 or window < 0:
     #     raise ValueError("Window size should be positive odd integer")
@@ -33,6 +37,8 @@ def sma(x: Sequence, window: int) -> Sequence:
 
 
 def wma(x: Sequence, window: int, weight: Sequence) -> Sequence:
+    """Weighted Moving Average Function.
+    """
     # Note that <window> should be an odd number
     if not isinstance(window, int) or window % 2 != 1 or window < 0:
         raise ValueError("Window size should be positive odd integer")

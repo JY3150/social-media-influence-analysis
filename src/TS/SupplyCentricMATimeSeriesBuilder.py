@@ -1,3 +1,4 @@
+from TS.TimeSeriesBuilderBase import TimeSeriesBuilderBase
 from Aggregation.ContentDemandSupply import ContentDemandSupply
 from User.UserType import UserType
 from Aggregation.ContentSpace import ContentSpace
@@ -31,11 +32,13 @@ def _find_time_index(create_time: datetime,
     return ind_list
 
 
-class SupplyCentricMATimeSeriesBuilder:
+class SupplyCentricMATimeSeriesBuilder(TimeSeriesBuilderBase):
+    """
+    SupplyCentric + MA.
+    """
     ds: ContentDemandSupply
-    space: ContentSpace
+
     window: timedelta
-    time_stamps: List[datetime]
     alpha: float
 
     supply_tweet_id_dict: Dict[int, List[int]]
@@ -52,16 +55,6 @@ class SupplyCentricMATimeSeriesBuilder:
 
         self.supply_tweet_id_dict = {}
         self._build_supply_id_dict()
-
-    def _create_time_stamps(self, start: datetime, end: datetime,
-                            period: timedelta) -> None:
-        """Create a list of time stamps for partitioning the Tweet, and
-        store in self.time_stamps.
-        """
-        curr_time = start
-        while curr_time <= end:
-            self.time_stamps.append(curr_time)
-            curr_time += period
 
     def _build_supply_id_dict(self) -> None:
         # Note: this assumes space contains all original tweets
@@ -128,19 +121,3 @@ class SupplyCentricMATimeSeriesBuilder:
 
         # return result
         return output_list
-
-    def create_all_type_time_series(self, user_type_or_id: Union[UserType, int],
-                                    mapping: str) -> List[int]:
-        # initialization
-        series = np.zeros(len(self.time_stamps))
-        # accumulation
-        for content_type in self.space.content_space:
-            a = self.create_time_series(user_type_or_id,
-                                        content_type.get_representation(),
-                                        mapping)
-            series += a
-        # convert back
-        series = series.tolist()
-        return series
-
-

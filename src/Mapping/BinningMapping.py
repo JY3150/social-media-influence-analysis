@@ -7,7 +7,10 @@ from sklearn.decomposition import PCA
 
 
 class BinningMapping(ContentTypeMapping):
-    
+    """
+    The representation of a ContentType is determined by 1D PCA.
+    """
+
     ids: List[int]
     market: Optional[ContentMarket]
     bin_boundaries: List[float]
@@ -103,7 +106,7 @@ class BinningMapping(ContentTypeMapping):
         # self.bin_boundaries = [min_pca + i * bin_size for i in range(num_bins - 1)] + [max_pca]
 
         # self.bins = [self._find_bin_number(pca_value) for pca_value in pca.components_[0]]
-    
+
 
     def generate_tweet_to_type(self):
         """Assign each tweet with a bin."""

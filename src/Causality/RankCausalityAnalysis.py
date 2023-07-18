@@ -1,6 +1,6 @@
 from Aggregation.ContentSpace import ContentSpace
 from Aggregation.ContentDemandSupply import ContentDemandSupply
-from TS.TimeSeriesBuilder import TimeSeriesBuilder
+from TS.SimpleTimeSeriesBuilder import SimpleTimeSeriesBuilder
 
 from Causality.CausalityAnalysisTool import *
 from analysis import calculate_bhattacharyya_ranks, \
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 class RankCausalityAnalysis:
 
     space: ContentSpace
-    ts_builder: TimeSeriesBuilder
+    ts_builder: SimpleTimeSeriesBuilder
     ds: ContentDemandSupply
 
     b_rank_list: Dict[int, List[int]]
@@ -21,7 +21,7 @@ class RankCausalityAnalysis:
 
     user_ids: Set[int]  # helper
 
-    def __init__(self, space: ContentSpace, ts_builder: TimeSeriesBuilder):
+    def __init__(self, space: ContentSpace, ts_builder: SimpleTimeSeriesBuilder):
         self.space = space
         self.ts_builder = ts_builder
         self.ds = ts_builder.ds

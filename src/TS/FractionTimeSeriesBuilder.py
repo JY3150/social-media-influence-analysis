@@ -1,3 +1,4 @@
+from TS.TimeSeriesBuilderBase import TimeSeriesBuilderBase
 from Aggregation.ContentDemandSupply import ContentDemandSupply
 from User.UserType import UserType
 from Aggregation.ContentSpace import ContentSpace
@@ -31,9 +32,12 @@ def _find_time_index(create_time: datetime,
     return ind_list
 
 
-class FractionTimeSeriesBuilder:
+class FractionTimeSeriesBuilder(TimeSeriesBuilderBase):
+    """
+    Return the fraction of a content_type it occupies in the content space.
+    """
     ds: ContentDemandSupply
-    space: ContentSpace
+
     window: timedelta
 
     demand: Dict[Union[UserType, int], Dict[Any, List[float]]]
@@ -41,8 +45,6 @@ class FractionTimeSeriesBuilder:
 
     agg_demand: Dict[Any, List[int]]
     agg_supply: Dict[Any, List[int]]
-
-    time_stamps: List[datetime]
 
     def __init__(self, ds: ContentDemandSupply, space: ContentSpace,
                  start: datetime, end: datetime, period: timedelta,
@@ -58,17 +60,7 @@ class FractionTimeSeriesBuilder:
         self.agg_demand = {}
         self.agg_supply = {}
 
-    def _create_time_stamps(self, start: datetime, end: datetime,
-                            period: timedelta) -> None:
-        """Create alpha list of time stamps for partitioning the Tweet, and
-        store in self.time_stamps.
-        """
-        curr_time = start
-        while curr_time <= end:
-            self.time_stamps.append(curr_time)
-            curr_time += period
-
-    def get_frac_time_series(self, user_type_or_id: Union[UserType, int],
+    def create_time_series(self, user_type_or_id: Union[UserType, int],
                            content_repr: Any, mapping: str) -> List[float]:
         if mapping not in ["demand_in_community", "demand_out_community",
                            "supply"]:
@@ -132,7 +124,9 @@ class FractionTimeSeriesBuilder:
             elif mapping == "supply":
                 return self.supply[user_type_or_id][content_repr]
 
-    def get_agg_time_series(self, content_repr: Any, mapping: str) -> List[float]:
+    def create_agg_time_series(self, content_repr: Any, mapping: str) -> List[float]:
+        """Rewrite for fraction calculation.
+        """
         # if already computed, then return
         if mapping == "demand_in_community" and content_repr in self.agg_demand.keys():
             return self.agg_demand[content_repr]

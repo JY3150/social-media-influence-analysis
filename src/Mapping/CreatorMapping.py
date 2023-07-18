@@ -5,6 +5,9 @@ from typing import Dict, Any, Optional
 
 
 class CreatorMapping(ContentTypeMapping):
+    """
+    The representation of a ContentType is the original tweet's user_id.
+    """
 
     dao: Optional[ContentMarketMongoDAO]
 

@@ -5,6 +5,9 @@ from typing import Dict, Any, List, Tuple
 
 
 class KmersMapping(ContentTypeMapping):
+    """
+    The representation of a ContentType is determined by Kmers algorithm.
+    """
 
     cluster_centers: Dict[str, np.array]  # cluster id to center vector
     radius: float

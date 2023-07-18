@@ -5,8 +5,11 @@ import numpy as np
 
 
 class EmbeddingMapping(ContentTypeMapping):
+    """
+    The representation of a ContentType is determined by its embedding.
+    """
 
-    embeddings: Dict[float, np.array]
+    embeddings: Dict[int, np.array]
 
     def __init__(self, args: Dict[str, Any]):
         super().__init__(args)

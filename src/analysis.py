@@ -4,7 +4,7 @@ from Builder.ContentDemandSupplyBuilder import ContentDemandSupplyBuilder
 from UserPartitioning import UserPartitioningStrategyFactory
 from DAO.DAOFactory import DAOFactory
 from User.UserType import UserType
-from TS.TimeSeriesBuilder import TimeSeriesBuilder
+from TS.SimpleTimeSeriesBuilder import SimpleTimeSeriesBuilder
 from Tweet.MinimalTweet import MinimalTweet
 from TS.TSATool import *
 
@@ -568,7 +568,7 @@ if __name__ == "__main__":
     start = datetime(2020, 6, 1)  # datetime(2020, 6, 29)
     end = datetime(2023, 4, 1)  # datetime(2023, 3, 5)  # (2023, 3, 5) is for rachel_chess_content_market
     period = timedelta(days=30)
-    ts_builder = TimeSeriesBuilder(ds, space, start, end, period)
+    ts_builder = SimpleTimeSeriesBuilder(ds, space, start, end, period)
 
     # plot_demand_and_supply(ds, [UserType.CONSUMER, UserType.CORE_NODE],
     #                        [UserType.PRODUCER, UserType.CORE_NODE])
