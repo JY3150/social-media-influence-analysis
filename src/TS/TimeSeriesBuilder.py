@@ -6,6 +6,7 @@ from Aggregation.ContentSpace import ContentSpace
 
 from typing import List, Any, Union, Dict, DefaultDict, Set
 from datetime import datetime, timedelta
+import numpy as np
 
 
 def _find_time_index(create_time: datetime,
@@ -110,7 +111,8 @@ class TimeSeriesBuilder:
         return demand_series, supply_series
 
     def create_mapping_series(self, mapping: str) \
-        -> List[Dict[Union[UserType, int], DefaultDict[Any, Set[MinimalTweet]]]]:
+            -> List[Dict[
+                Union[UserType, int], DefaultDict[Any, Set[MinimalTweet]]]]:
         """Creates a list of mappings. Each mapping in the list is restricted to the tweets that are
         in that time period."""
         # TODO: there is probably a better way to do this -- refactor.
@@ -126,7 +128,9 @@ class TimeSeriesBuilder:
             temp2 = {}
             for content_type in self.ds.content_space:
                 temp2[content_type.get_representation()] \
-                    = self._partition_tweets_specific(user_type_or_id, content_type.get_representation(), mapping)
+                    = self._partition_tweets_specific(user_type_or_id,
+                                                      content_type.get_representation(),
+                                                      mapping)
             temp1[user_type_or_id] = temp2
         print("Creation takes ", time.time() - start_time, " Seconds")
 
@@ -138,7 +142,8 @@ class TimeSeriesBuilder:
             for user_type_or_id in vars(self.ds)[mapping]:
                 content_dict = {}
                 for content_type in self.ds.content_space:
-                    content_dict[content_type.get_representation()] = temp1[user_type_or_id][content_type.get_representation()][i]
+                    content_dict[content_type.get_representation()] = \
+                    temp1[user_type_or_id][content_type.get_representation()][i]
                 mapping_dict[user_type_or_id] = content_dict
             mapping_series[i] = mapping_dict
         print("Transform takes ", time.time() - start_time, " Seconds")
@@ -146,13 +151,15 @@ class TimeSeriesBuilder:
 
         return mapping_series
 
-    def partition_tweets_by_tweet_type(self, tweet_type: str) -> List[Set[ContentSpaceTweet]]:
+    def partition_tweets_by_tweet_type(self, tweet_type: str) -> List[
+        Set[ContentSpaceTweet]]:
         """Create a list of sets of tweets. Each set in the list is restricted to the tweets that
         are in that time period.
         <tweet_type> refers to either retweets_of_in_comm, retweets_of_out_comm, or original_tweets.
         """
         # TODO: refactor this to use the TweetType module?
-        if tweet_type not in ["retweets_of_in_comm", "retweets_of_out_comm", "original_tweets"]:
+        if tweet_type not in ["retweets_of_in_comm", "retweets_of_out_comm",
+                              "original_tweets"]:
             raise KeyError("Invalid Tweet Type.")
 
         len_time = len(self.time_stamps)
@@ -165,13 +172,15 @@ class TimeSeriesBuilder:
 
         return partitioned_tweets
 
-    def _partition_tweets_specific(self, user_type_or_id: Union[UserType, int], content_repr: Any,
+    def _partition_tweets_specific(self, user_type_or_id: Union[UserType, int],
+                                   content_repr: Any,
                                    mapping: str) -> List[Set[MinimalTweet]]:
         """Create a list of a sets of tweets. Each set in the list is restricted to the tweets that
         are in that time period, that have <user_type_or_id>, <content_repr>, and are a part of
         <mapping>.
         """
-        if mapping not in ["demand_in_community", "demand_out_community", "supply"]:
+        if mapping not in ["demand_in_community", "demand_out_community",
+                           "supply"]:
             raise KeyError("Invalid Mapping Type.")
 
         # Extraction
@@ -190,3 +199,16 @@ class TimeSeriesBuilder:
                 output_list[index].add(tweet)
 
         return output_list
+
+    def create_all_type_time_series(self, user_type_or_id: Union[UserType, int],
+                                    mapping: str) -> List[int]:
+        series = None
+        for content_type in self.space.content_space:
+            a = self.create_time_series(user_type_or_id,
+                                        content_type.get_representation(),
+                                        mapping)
+            if series is None:
+                series = a
+            else:
+                series = np.add(a, series)
+        return series

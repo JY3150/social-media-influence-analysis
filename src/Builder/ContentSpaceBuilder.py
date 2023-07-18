@@ -119,7 +119,7 @@ class ContentSpaceBuilder(BuilderBase):
             new_users.add(ContentSpaceUser(**user_dict))
         return new_users
 
-    def filter_original_tweets(self, original_tweets: Set[ContentMarketTweet], 
+    def filter_original_tweets(self, original_tweets: Set[ContentMarketTweet],
                                retweets_of_in_community: Set[ContentMarketTweet]) \
                                 -> Set[ContentMarketTweet]:
         """Remove original tweets that are never retweeted in community."""
@@ -131,8 +131,8 @@ class ContentSpaceBuilder(BuilderBase):
             if tweet.id in original_ids:
                 filtered_tweets.add(tweet)
         return filtered_tweets
-    
-    def filter_retweets_of_in_community(self, original_tweets: Set[ContentMarketTweet], 
+
+    def filter_retweets_of_in_community(self, original_tweets: Set[ContentMarketTweet],
                                         retweets_of_in_community: Set[ContentMarketTweet]) \
                                             -> Set[ContentMarketTweet]:
         """Remove retweets of in community that do not map to an original tweet."""
@@ -144,8 +144,8 @@ class ContentSpaceBuilder(BuilderBase):
             if tweet.retweet_id in original_ids:
                 filtered_tweets.add(tweet)
         return filtered_tweets
-    
-    def filter_retweets_of_out_community(self, original_tweets: Set[ContentMarketTweet], 
+
+    def filter_retweets_of_out_community(self, original_tweets: Set[ContentMarketTweet],
                                          retweets_of_out_community: Set[ContentMarketTweet]) \
                                             -> Set[ContentMarketTweet]:
         """Remove retweets of out community that do not map to an original tweet."""
@@ -157,13 +157,12 @@ class ContentSpaceBuilder(BuilderBase):
             if tweet.retweet_id in original_ids:
                 filtered_tweets.add(tweet)
         return filtered_tweets
-    
+
     # def filter_mapping(self, tweet_manager: TweetManager):
     #     original_tweet_ids = {tweet.id for tweet in tweet_manager.original_tweets}
     #     retweets_of_in_comm_ids = {tweet.id for tweet in tweet_manager.retweets_of_in_comm}
     #     retweets_of_out_comm_ids = {tweet.id for tweet in tweet_manager.retweets_of_out_comm}
     #     all_ids = original_tweet_ids.union(retweets_of_in_comm_ids.union(retweets_of_out_comm_ids))
-        
+
     #     filtered_mapping = {}
     #     for id in self.mapping.tweet_to_type:
-            
