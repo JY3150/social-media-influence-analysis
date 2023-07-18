@@ -70,7 +70,7 @@ class CreatorCausalityAnalysis:
         """
         p_dict = {}
         core_node_list = [user.user_id for user in self.ds.user_manager.core_nodes]
-        for content_type_repr in self.ds.get_content_type_repr():
+        for content_type_repr in self.ds.get_all_content_type_repr():
             if int(content_type_repr) in core_node_list:
                 continue
             consumer_series = self.ds.get_type_demand_series(UserType.CONSUMER)[content_type_repr]
@@ -90,7 +90,7 @@ class CreatorCausalityAnalysis:
         """
         p_dict = {}
         core_node_list = [user.user_id for user in self.ds.user_manager.core_nodes]
-        for content_type_repr in self.ds.get_content_type_repr():
+        for content_type_repr in self.ds.get_all_content_type_repr():
             if int(content_type_repr) in core_node_list:
                 continue
             core_node_series = self.ds.get_type_demand_series(UserType.CORE_NODE)[content_type_repr]
