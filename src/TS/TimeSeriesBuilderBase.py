@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from User.UserType import UserType
 from Aggregation.ContentSpace import ContentSpace
+from Aggregation.ContentDemandSupply import ContentDemandSupply
 
 from typing import List, Union, Any, Sequence
 from datetime import datetime, timedelta
@@ -11,6 +12,7 @@ class TimeSeriesBuilderBase(ABC):
     """
     A parent class to all time series builder classes.
     """
+    ds: ContentDemandSupply
     space: ContentSpace
     time_stamps: List[datetime]
 
@@ -23,6 +25,9 @@ class TimeSeriesBuilderBase(ABC):
         while curr_time <= end:
             self.time_stamps.append(curr_time)
             curr_time += period
+
+    def get_time_stamps(self) -> List[datetime]:
+        return self.time_stamps
 
     @abstractmethod
     def create_time_series(self, user_type_or_id: Union[UserType, int],

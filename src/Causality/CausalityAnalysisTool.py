@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-from statsmodels.tsa.stattools import grangercausalitytests, adfuller
+from statsmodels.tsa.stattools import grangercausalitytests, adfuller,\
+    InfeasibleTestError
 from sklearn.metrics.pairwise import cosine_similarity
 
 from typing import List, Sequence
@@ -41,7 +42,12 @@ def gc_score_for_lags(indep_series: Sequence, dep_series: Sequence,
     """
     result = []
     for lag in lags:
-        result.append(gc_score_for_lag(indep_series, dep_series, lag))
+        try:
+            p_val = gc_score_for_lag(indep_series, dep_series, lag, test,
+                                     verbose)
+        except InfeasibleTestError:
+            p_val = 1
+        result.append(p_val)
     return result
 
 

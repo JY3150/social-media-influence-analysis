@@ -35,6 +35,8 @@ def _find_time_index(create_time: datetime,
 class FractionTimeSeriesBuilder(TimeSeriesBuilderBase):
     """
     Return the fraction of a content_type it occupies in the content space.
+
+    Note: this class is no longer used
     """
     ds: ContentDemandSupply
 

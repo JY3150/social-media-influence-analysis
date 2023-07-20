@@ -13,7 +13,6 @@ def _find_time_index(create_time: datetime, time_stamps: List[datetime],
 
     Precondition: time_stamps is sorted
     """
-    # Note: rewrite for moving average
     ind_list = []
 
     lb = create_time - window
@@ -35,8 +34,6 @@ class MATimeSeriesBuilder(TimeSeriesBuilderBase):
     Count the tweet if the time stamps lies in
     [created_at - window, created_at + window].
     """
-    ds: ContentDemandSupply
-
     window: timedelta
 
     def __init__(self, ds: ContentDemandSupply, space: ContentSpace,
@@ -47,16 +44,6 @@ class MATimeSeriesBuilder(TimeSeriesBuilderBase):
         self.time_stamps = []
         self._create_time_stamps(start, end, period)
         self.window = window
-
-    def _create_time_stamps(self, start: datetime, end: datetime,
-                            period: timedelta) -> None:
-        """Create a list of time stamps for partitioning the Tweet, and
-        store in self.time_stamps.
-        """
-        curr_time = start
-        while curr_time <= end:
-            self.time_stamps.append(curr_time)
-            curr_time += period
 
     def create_time_series(self, user_type_or_id: Union[UserType, int],
                            content_repr: Any, mapping: str) -> List[int]:

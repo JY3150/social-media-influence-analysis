@@ -23,7 +23,6 @@ class SimpleTimeSeriesBuilder(TimeSeriesBuilderBase):
     """
     Simply aggregate supply or demand in their creation time.
     """
-    ds: ContentDemandSupply
 
     def __init__(self, ds: ContentDemandSupply, space: ContentSpace,
                  start: datetime, end: datetime, period: timedelta):
@@ -32,6 +31,9 @@ class SimpleTimeSeriesBuilder(TimeSeriesBuilderBase):
 
         self.time_stamps = []
         self._create_time_stamps(start, end, period)
+
+    def get_time_stamps(self) -> List[datetime]:
+        return self.time_stamps[:-1]
 
     def create_time_series(self, user_type_or_id: Union[UserType, int],
                            content_repr: Any, mapping: str) -> List[int]:

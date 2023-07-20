@@ -22,8 +22,6 @@ class SupplyCentricTimeSeriesBuilder(TimeSeriesBuilderBase):
     """
     Count the retweets at the time stamp as its original tweet.
     """
-    ds: ContentDemandSupply
-
     alpha: float
 
     supply_tweet_id_dict: Dict[int, int]
@@ -40,7 +38,12 @@ class SupplyCentricTimeSeriesBuilder(TimeSeriesBuilderBase):
         self.supply_tweet_id_dict = {}
         self._build_supply_id_dict()
 
+    def get_time_stamps(self) -> List[datetime]:
+        return self.time_stamps[:-1]
+
     def _build_supply_id_dict(self) -> None:
+        """Store original tweet's time index in self.supply_tweet_id_dict.
+        """
         # Note: this assumes space contains all original tweets
         len_time = len(self.time_stamps)
         for tweet in self.space.original_tweets:

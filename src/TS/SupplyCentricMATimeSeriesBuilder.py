@@ -36,8 +36,6 @@ class SupplyCentricMATimeSeriesBuilder(TimeSeriesBuilderBase):
     """
     SupplyCentric + MA.
     """
-    ds: ContentDemandSupply
-
     window: timedelta
     alpha: float
 
@@ -57,6 +55,8 @@ class SupplyCentricMATimeSeriesBuilder(TimeSeriesBuilderBase):
         self._build_supply_id_dict()
 
     def _build_supply_id_dict(self) -> None:
+        """Store original tweet's time index in self.supply_tweet_id_dict.
+        """
         # Note: this assumes space contains all original tweets
         len_time = len(self.time_stamps)
         for tweet in self.space.original_tweets:
