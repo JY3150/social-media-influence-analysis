@@ -16,7 +16,7 @@ class EmbeddingMapping(ContentTypeMapping):
         # extract arguments
         self.embeddings = args["embeddings"]
 
-    def generate_tweet_to_type(self):
+    def generate_tweet_to_type(self) -> None:
         """Assign each tweet with embedding vector generated from ./tweet2vec.
         """
         content_type_set = set()

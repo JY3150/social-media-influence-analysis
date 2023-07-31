@@ -108,7 +108,7 @@ class BinningMapping(ContentTypeMapping):
         # self.bins = [self._find_bin_number(pca_value) for pca_value in pca.components_[0]]
 
 
-    def generate_tweet_to_type(self):
+    def generate_tweet_to_type(self) -> None:
         """Assign each tweet with a bin."""
         content_type_set = set()
         for i in range(len(self.ids)):

@@ -16,7 +16,7 @@ class CreatorMapping(ContentTypeMapping):
         # extract arguments
         self.dao = args["dao"]
 
-    def generate_tweet_to_type(self):
+    def generate_tweet_to_type(self) -> None:
         """Assign each tweet with its original tweet's creator.
         """
         content_type_set = set()

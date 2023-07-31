@@ -34,7 +34,7 @@ class KmersMapping(ContentTypeMapping):
         self.centers = centers
         self.radius = radius
 
-    def generate_tweet_to_type(self):
+    def generate_tweet_to_type(self) -> None:
         """Assign each tweet with cluster generated from Kmers algorithm.
         """
         content_type_set = set()
