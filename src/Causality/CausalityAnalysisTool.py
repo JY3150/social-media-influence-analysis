@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
-from statsmodels.tsa.stattools import grangercausalitytests, adfuller,\
+from statsmodels.tsa.stattools import grangercausalitytests, adfuller, \
     InfeasibleTestError
+import statsmodels.api as sm
 from sklearn.metrics.pairwise import cosine_similarity
 
-from typing import List, Sequence
+from typing import List, Sequence, Tuple
 
 import warnings
 
@@ -74,6 +75,16 @@ def cos_similarity(seq1: Sequence, seq2: Sequence) -> float:
     return similarity
 
 
+def cs_for_lag(indep_series: Sequence, dep_series: Sequence, lag: int) -> float:
+    assert len(indep_series) == len(dep_series)
+    if lag > 0:
+        return cos_similarity(indep_series[:-lag], dep_series[lag:])
+    elif lag < 0:
+        return cos_similarity(indep_series[-lag:], dep_series[:lag])
+    else:
+        return cos_similarity(indep_series, dep_series)
+
+
 def cs_for_lags(indep_series: Sequence, dep_series: Sequence,
                 lags: List[int]) -> List[float]:
     """
@@ -94,11 +105,74 @@ def cs_for_lags(indep_series: Sequence, dep_series: Sequence,
     return result
 
 
-def cs_for_lag(indep_series: Sequence, dep_series: Sequence, lag: int) -> float:
-    assert len(indep_series) == len(dep_series)
-    if lag > 0:
-        return cos_similarity(indep_series[:-lag], dep_series[lag:])
-    elif lag < 0:
-        return cos_similarity(indep_series[-lag:], dep_series[:lag])
-    else:
-        return cos_similarity(indep_series, dep_series)
+def ols_slope(indep_series: Sequence, dep_series: Sequence) -> \
+        Tuple[float, Tuple[float, float]]:
+    """Return p-value, lower bound, and upper bound of confidence interval with
+    significant level = 0.05.
+    """
+    # independent variable preprocessing
+    indep_series = sm.add_constant(indep_series)
+
+    # model fit
+    model = sm.OLS(dep_series, indep_series).fit()
+    slope = model.params[1]
+    conf_int = tuple(model.conf_int(alpha=0.05)[1])
+    return slope, conf_int
+
+
+def lr_for_lag(indep_series: Sequence, dep_series: Sequence, lag: int) -> \
+        Tuple[float, Tuple[float, float]]:
+    """Return p-value, lower bound, and upper bound of confidence interval.
+    """
+    if _list_depth(indep_series) == 1:
+        if lag > 0:
+            return ols_slope(np.array([indep_series[:-lag], dep_series[:-lag]]).T, dep_series[lag:])
+        elif lag < 0:
+            return ols_slope(np.array([dep_series[:lag], indep_series[:lag]]).T, indep_series[-lag:])
+        else:
+            return 0, (0, 0)
+    elif _list_depth(indep_series) == 2:
+        indep_input = []
+        dep_indep = []
+        dep_input = []
+        if lag > 0:
+            # build input list
+            for indep_list in indep_series:
+                indep_input.extend(indep_list[:-lag])
+            for dep_list in dep_series:
+                dep_indep.extend(dep_list[:-lag])
+                dep_input.extend(dep_list[lag:])
+
+            return ols_slope(np.array([indep_input, dep_indep]).T, dep_input)
+        elif lag < 0:
+            # build input list
+            for indep_list in indep_series:
+                indep_input.extend(indep_list[-lag:])
+                dep_indep.extend(indep_list[:lag])
+            for dep_list in dep_series:
+                dep_input.extend(dep_list[:lag])
+
+            return ols_slope(dep_input, indep_input)
+        else:
+            return 0, (0, 0)
+
+
+def lr_for_lags(indep_series: Sequence, dep_series: Sequence,
+                lags: List[int]) -> Tuple[List[float], List[Tuple[float, float]]]:
+    slope_list = []
+    conf_int_list = []
+    for lag in lags:
+        slope, conf_int = lr_for_lag(indep_series, dep_series, lag)
+        slope_list.append(slope)
+        conf_int_list.append(conf_int)
+    return slope_list, conf_int_list
+
+
+def _list_depth(lst: Sequence) -> int:
+    """Return the depth of lst. Assume the input list has at least one element,
+    and the depth is uniform across all sublist.
+    """
+    sub = lst[0]
+    if isinstance(sub, list):
+        return _list_depth(sub) + 1
+    return 1
