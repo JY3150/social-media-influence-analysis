@@ -59,3 +59,16 @@ class AggregationBase:
         for user in self.core_nodes:
             if user.user_id == user_id:
                 return user
+
+    def get_user_id_by_name(self, name: str) -> int:
+        """Return the user with <name>.
+        """
+        for user in self.consumers:
+            if user.username == name:
+                return user.user_id
+        for user in self.producers:
+            if user.username == name:
+                return user.user_id
+        for user in self.core_nodes:
+            if user.username == name:
+                return user.user_id
