@@ -3,14 +3,15 @@ from User.UserType import UserType
 from Tweet.TweetType import TweetType
 from Aggregation.AggregationBase import AggregationBase
 from Mapping.ContentType import ContentType
+from Tweet.ContentSpaceTweet import ContentSpaceTweet
 from Tweet.MinimalTweet import MinimalTweet
 from User.ContentSpaceUser import ContentSpaceUser
+from Aggregation.ContentSpace import ContentSpace
 
 from typing import Dict, List, Any, Set, DefaultDict, Union
 from tqdm import tqdm
 from collections import defaultdict
 from datetime import datetime
-
 
 def _merge_dicts(dict1: Dict[Any, Set[MinimalTweet]], dict2: Dict[Any,
                  Set[MinimalTweet]]) -> None:
@@ -155,3 +156,23 @@ class ContentDemandSupply(AggregationBase):
         _clear_by_time_helper(start, end, self.demand_in_community)
         _clear_by_time_helper(start, end, self.demand_out_community)
         _clear_by_time_helper(start, end, self.supply)
+
+    def get_tweets_by_type(self, content_type: Any, tweet_type: TweetType,
+                           space: ContentSpace) -> Set[ContentSpaceTweet]:
+        """Get all the tweets of <tweet_type> with <content_type>.
+        """
+        # 1. Get all targeted tweets
+        if tweet_type == TweetType.ORIGINAL_TWEET:
+            tweet_set = (self.supply[UserType.CORE_NODE][content_type] |
+                         self.supply[UserType.PRODUCER][content_type])
+        elif tweet_type == TweetType.RETWEET_OF_IN_COMM:
+            tweet_set = (self.demand_in_community[UserType.CONSUMER][content_type] |
+                         self.demand_in_community[UserType.CORE_NODE][content_type])
+        elif tweet_type == TweetType.RETWEET_OF_OUT_COMM:
+            tweet_set = (self.demand_out_community[UserType.CONSUMER][content_type] |
+                         self.demand_out_community[UserType.CORE_NODE][content_type])
+        else:
+            tweet_set = set()
+
+        # 2. Retreive ContentSpaceTweet instead
+        return {space.get_tweet(tweet.id) for tweet in tweet_set}
