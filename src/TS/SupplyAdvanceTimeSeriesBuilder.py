@@ -19,7 +19,8 @@ def _find_time_index(create_time: datetime,
 
 class SupplyAdvanceTimeSeriesBuilder(TimeSeriesBuilderBase):
     """
-    Count the retweet in advance of the time stamps for its original tweet.
+    Count the retweet in advance of the time stamps for its original tweet. Used
+    to check the validity of causality functions.
     """
     advance: int
 
