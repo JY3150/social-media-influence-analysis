@@ -6,7 +6,6 @@ from DAO.DAOFactory import DAOFactory
 from User.UserType import UserType
 from TS.SimpleTimeSeriesBuilder import SimpleTimeSeriesBuilder
 from Tweet.MinimalTweet import MinimalTweet
-from TS.TSATool import *
 
 from typing import Dict, List, Union
 import json
@@ -446,12 +445,14 @@ def calculate_social_support_ranks(space, original_tweets, retweets_of_in_comm, 
     """Returns a dictionary mapping each user_id to its social support rank.
     <original_tweets> and <retweets_of_in_comm> are sets of the tweets in the form of the original
     tweets and the retweets of in comm in ContentSpace."""
+    # Note: the input <original_tweets> and <retweets_of_in_comm>
+    # should be ContentSpaceTweet
     # TODO: figure out a way to load the producer,
-    users = space.producers.union(space.core_nodes.union(space.consumers))
+    users = space.producers | space.core_nodes | space.consumers
     user_ids = {user.user_id for user in users}
     user_id_to_score = {user_id: [0, 0] for user_id in user_ids}
     friends = create_friends_dict(space, user_ids)
-    tweets = [tweet for tweet in original_tweets] + [tweet for tweet in retweets_of_in_comm]
+    tweets = list(original_tweets) + list(retweets_of_in_comm)
     tweets_by_retweet_group = _group_by_retweet_id(tweets)
     def get_retweets_of_tweet_id(tweet_id):
         return tweets_by_retweet_group.get(tweet_id, [])
