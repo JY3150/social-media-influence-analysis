@@ -3,7 +3,7 @@
     "db_type": "Mongo",
     "connection_url": "mongodb://localhost:27017/",
 
-    "community_db_name": "rachel_chess_community",
+    "community_db_name": "070823_ml_community_4",
     "community_info_collection": "user_info",
     "user_info_collection": "user_info",
     "original_tweets_collection": "original_tweets",
@@ -13,7 +13,7 @@
     "retweets_of_out_community_collection": "retweets_of_out_community",
     "retweets_of_out_community_by_in_community_collection": "retweets_of_out_community_by_in_community", 
 
-    "content_market_db_name": "new_rachel_chess_content_market",
+    "content_market_db_name": "070823_ml_content_market_4",
     "clean_original_tweets_collection": "original_tweets",
     "clean_replies_collection": "clean_replies",
     "clean_quotes_of_in_community_collection": "clean_quotes_of_in_community",
