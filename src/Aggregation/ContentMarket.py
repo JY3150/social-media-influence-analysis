@@ -52,6 +52,8 @@ class ContentMarket(AggregationBase):
     original_tweets: Set[ContentMarketTweet]
     retweets_of_in_comm: Set[ContentMarketTweet]
     retweets_of_out_comm: Set[ContentMarketTweet]
+    # add retweets of out community by in community
+    retweets_of_out_comm_by_in_comm: Set[ContentMarketTweet]
 
     def preserve_core_node(self, user_id: int) -> None:
         # get desired user id list

@@ -81,8 +81,11 @@ if not SPACE_SKIP:
         print("=================Creating Mapping=================")
         mapping_factory = MappingFactory(config["content_type_method"])
         mapping = mapping_factory.get_cluster({
-            "num_bins": config["num_bins"],
+            "num_clusters": config["num_clusters"],
             "embeddings": market_dao.load_tweet_embeddings(),
+            # "words": ["chess"],
+            "num_bins": config["num_bins"],
+            "market": market
         })
         mapping.generate_tweet_to_type()
         pickle.dump(mapping, open("binning_mapping.pkl", "wb"))
@@ -158,3 +161,49 @@ plt.axhline(y=0.05, color="red", linestyle="--")
 title = "granger causality for aggregate supply and demand, advance = 9 days"
 plt.title(title)
 plt.savefig("../results/" + title)
+
+# Results for structural properties
+from analysis import original_tweets_to_retweets_ratio, plot_social_support_rank_and_value, \
+    plot_social_support_and_number_of_followers, plot_social_support_and_number_of_followings, \
+    plot_rank_binned_followings, plot_bhattacharyya_distances, \
+    plot_social_support_rank_and_retweets, relative_frequency_months
+
+original_tweets_to_retweets_ratio(market)
+
+plot_social_support_rank_and_value(space, [False, False, False, True])
+plot_social_support_and_number_of_followers(space)
+plot_social_support_and_number_of_followings(space)
+plot_rank_binned_followings(space, bin_size=20, log=False)
+plot_social_support_rank_and_value(space, [True, True, False, False])
+print(len(space.retweets_of_in_comm))
+print(len(space.retweets_of_out_comm_by_in_comm))
+plot_social_support_rank_and_retweets(space)
+
+# Bhattacharyya
+plot_bhattacharyya_distances(space, ds)
+
+# NMF topic modelling
+from nmf import preprocess, find_good_num_topics, create_nmf_model, plot_top_words
+
+tweets = sorted(list(market.original_tweets.union(market.retweets_of_in_comm)), 
+                key=lambda tweet: tweet.id)
+print("Length of tweets: " + str(len(tweets)))
+
+# Preprocess
+print("Creating corpus..." + str(datetime.now()))
+texts, corpus = preprocess(tweets)
+print("Done creating corpus... " + str(datetime.now()))
+
+# Find the best number of topics to use (this takes a while)
+# There is also an error with this function: see https://stackoverflow.com/questions/63763610/get-coherence-function-error-in-python-while-using-lda
+# find_good_num_topics(texts)
+nmf, vectorizer, tweet_id_to_topic = create_nmf_model(tweets, corpus, 20)
+
+# Plot top words
+tfidf_feature_names = vectorizer.get_feature_names_out()
+plot_top_words(
+    nmf, tfidf_feature_names, n_top_words=10, title="Topics in NMF model (Frobenius norm)"
+)
+
+# Relative Frequencies
+relative_frequency_months(market)

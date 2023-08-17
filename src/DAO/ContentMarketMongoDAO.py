@@ -48,15 +48,15 @@ class ContentMarketMongoDAO(MongoDAOBase):
                 "username": user["username"],
                 "influence_one": user["influence one"],
                 "influence_two": user["influence two"],
-                "production_utility": user["production utility"],
-                "consumption_utility": user["consumption utility"],
+                # "production_utility": user["production utility"],
+                # "consumption_utility": user["consumption utility"],
                 "local_follower_count": user["local follower"],
                 "local_following_count": user["local following"],
                 "local_followers": user["local follower list"],
                 "local_following": user["local following list"],
                 "global_follower_count": user["global follower"],
                 "global_following_count": user["global following"],
-                "is_new_user": user["is new user"]
+                # "is_new_user": user["is new user"]
             }
             new_user = ContentMarketUser(**user_dict)
             users.add(new_user)
@@ -88,6 +88,10 @@ class ContentMarketMongoDAO(MongoDAOBase):
 
     def load_retweets_of_out_community(self) -> Set[ContentMarketTweet]:
         return self._load_tweets(self.clean_retweets_of_out_community_collection)
+    
+    # add retweets of out community by in community
+    def load_retweets_of_out_community_by_in_community(self) -> Set[ContentMarketTweet]:
+        return self._load_tweets(self.clean_retweets_of_out_community_by_in_community_collection)
 
     def load_replies(self) -> Set[ContentMarketTweet]:
         return self._load_tweets(self.clean_replies_collection)
@@ -102,6 +106,9 @@ class ContentMarketMongoDAO(MongoDAOBase):
                 user_dict["retweets_of_in_community"])
             user_dict["retweets_of_out_community"] = _serialize_market_tweet(
                 user_dict["retweets_of_out_community"])
+            # add retweets of out community by in community
+            user_dict["retweets_of_out_community_by_in_community"] = _serialize_market_tweet(
+                user_dict["retweets_of_out_community_by_in_community"])
             user_dict["quotes_of_in_community"] = _serialize_market_tweet(
                 user_dict["quotes_of_in_community"])
             user_dict["quotes_of_out_community"] = _serialize_market_tweet(
