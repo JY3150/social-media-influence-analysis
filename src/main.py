@@ -38,7 +38,7 @@ config = json.load(config_file)
 config_file.close()
 
 # Load from database
-MARKET_LOAD = True
+MARKET_LOAD = False
 SPACE_LOAD = False
 DEMAND_SUPPLY_LOAD = False
 

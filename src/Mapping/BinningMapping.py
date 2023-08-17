@@ -48,8 +48,9 @@ class BinningMapping(ContentTypeMapping):
         # retweets_of_in_comm_ids = {tweet.id for tweet in self.market.retweets_of_in_comm}
         # retweets_of_out_comm_ids = {tweet.id for tweet in self.market.retweets_of_out_comm}
         # retweets_of_out_comm_by_in_comm_ids = {tweet.id for tweet in self.market.retweets_of_out_comm_by_in_comm}
-        # # all_ids = original_tweet_ids.union(retweets_of_in_comm_ids.union(retweets_of_out_comm_ids.union(retweets_of_out_comm_by_in_comm_ids)))
-        # all_ids = original_tweet_ids.union(retweets_of_in_comm_ids)
+        # # all_ids is which ids to include in the embedding before PCA
+        # all_ids = original_tweet_ids.union(retweets_of_in_comm_ids.union(retweets_of_out_comm_ids.union(retweets_of_out_comm_by_in_comm_ids)))
+        # # all_ids = original_tweet_ids.union(retweets_of_in_comm_ids)
 
         # new_embeddings = {}
         # for tweet_id in embeddings:

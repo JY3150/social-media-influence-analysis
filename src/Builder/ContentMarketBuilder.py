@@ -28,13 +28,14 @@ class ContentMarketBuilder(BuilderBase):
     def create(self) -> ContentMarket:
         # Build Tweet Manager
         tweet_manager = TweetManager()
+        ### Unfiltered #############################################################################
         tweet_manager.load_tweets(self.dao.load_original_tweets(), TweetType.ORIGINAL_TWEET)
         tweet_manager.load_tweets(self.dao.load_retweets_of_in_community(), TweetType.RETWEET_OF_IN_COMM)
         tweet_manager.load_tweets(self.dao.load_retweets_of_out_community(), TweetType.RETWEET_OF_OUT_COMM)
         # add retweets of out community by in community
         tweet_manager.load_tweets(self.dao.load_retweets_of_out_community_by_in_community(), TweetType.RETWEET_OF_OUT_COMM_BY_IN_COMM)
 
-        # (4) - filtering
+        ### Filtered (Uncomment Below) #############################################################
         # tweet_manager.load_tweets(self.filter_original_tweets(self.dao.load_original_tweets(), self.dao.load_retweets_of_in_community()), TweetType.ORIGINAL_TWEET)
         # tweet_manager.load_tweets(self.filter_retweets_of_in_community(tweet_manager.original_tweets, self.dao.load_retweets_of_in_community()),
         #                           TweetType.RETWEET_OF_IN_COMM)
