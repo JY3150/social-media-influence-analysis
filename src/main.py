@@ -29,7 +29,8 @@ import pickle
 from datetime import datetime, timedelta
 import numpy as np
 import matplotlib.pyplot as plt
-
+# import nltk
+# nltk.download('averaged_perceptron_tagger')
 #%% ###################### Parameter Setup ######################
 # Load configuration
 config_file_path = "../config.json"
