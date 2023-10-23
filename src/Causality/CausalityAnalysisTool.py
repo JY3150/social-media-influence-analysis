@@ -8,6 +8,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from typing import List, Sequence, Tuple
 
 import warnings
+from TS.TimeSeriesBuilderBase import TimeSeriesBuilderBase
+from User.UserType import UserType
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -176,3 +178,59 @@ def _list_depth(lst: Sequence) -> int:
     if isinstance(sub, list):
         return _list_depth(sub) + 1
     return 1
+
+
+def ols_for_bins(ts: TimeSeriesBuilderBase, bins: set, lag: int):
+    # Create suitable dataframe
+    # Our dataframe will have 4 columns: demand, bin_number, time_window, and supply
+    df = pd.DataFrame()
+    demand = np.array([])
+    supply = np.array([])
+    bin_number = np.array([])
+    time_window = np.array([])
+    k = len(ts.time_stamps) - 1
+    for content_type in bins:
+        consumer_demand = ts.create_time_series(UserType.CONSUMER, content_type, "demand_in_community")
+        core_node_demand = ts.create_time_series(UserType.CORE_NODE, content_type, "demand_in_community")
+        core_node_supply = ts.create_time_series(UserType.CORE_NODE, content_type, "supply")
+        producer_supply = ts.create_time_series(UserType.PRODUCER, content_type, "supply")
+
+        demand = np.concatenate((demand, np.add(consumer_demand, core_node_demand)))
+        supply = np.concatenate((supply, np.add(producer_supply, core_node_supply)))
+        bin_number = np.concatenate((bin_number, np.array([content_type] * k)))
+        time_window = np.concatenate((time_window, np.array([i + 1 for i in range(k)])))
+    df['demand'] = demand
+    df['supply'] = supply
+    df['bin'] = bin_number
+    df['time_window'] = time_window
+
+    # create lagged values for the bin
+    for lag in range(1, lag + 1):
+        df[f'demand_lag_{lag}'] = df.groupby('bin')['demand'].shift(lag)
+
+    df = df.dropna()
+
+    # Apply one-hot encoding to the 'bin' column
+    df = pd.get_dummies(df, columns=['bin', 'time_window'], drop_first=True)
+
+    # Define the independent variables
+    X = df[[col for col in df.columns if col.startswith('demand')] + [col for col in df.columns if col.startswith('bin_')] + [col for col in df.columns if col.startswith('time_window')]]
+
+    # Add a constant (intercept) term
+    X = sm.add_constant(X)
+
+    # Define the dependent variable
+    y = df['supply']
+
+    # Fit the linear regression model
+    model = sm.OLS(y, X.astype(float)).fit()
+
+    # Print a summary of the model
+    print(model.summary())
+
+
+
+
+
+
+
