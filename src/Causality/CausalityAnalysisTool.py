@@ -10,6 +10,7 @@ from typing import List, Sequence, Tuple
 import warnings
 from TS.TimeSeriesBuilderBase import TimeSeriesBuilderBase
 from User.UserType import UserType
+import os
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -180,7 +181,7 @@ def _list_depth(lst: Sequence) -> int:
     return 1
 
 
-def ols_for_bins(ts: TimeSeriesBuilderBase, bins: set, lag: int):
+def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int):
     # Create suitable dataframe
     # Our dataframe will have 4 columns: demand, bin_number, time_window, and supply
     df = pd.DataFrame()
@@ -189,7 +190,12 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: set, lag: int):
     bin_number = np.array([])
     time_window = np.array([])
     k = len(ts.time_stamps) - 1
+    filename = ''
     for content_type in bins:
+        if filename == '':
+            filename += str(content_type)
+        else:
+            filename += '#' + str(content_type)
         consumer_demand = ts.create_time_series(UserType.CONSUMER, content_type, "demand_in_community")
         core_node_demand = ts.create_time_series(UserType.CORE_NODE, content_type, "demand_in_community")
         core_node_supply = ts.create_time_series(UserType.CORE_NODE, content_type, "supply")
@@ -209,6 +215,11 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: set, lag: int):
         df[f'demand_lag_{lag}'] = df.groupby('bin')['demand'].shift(lag)
 
     df = df.dropna()
+    try:
+        os.makedirs(f'Data/{filename}')
+    except OSError as error:
+        print(error)
+    df.to_csv(f'Data/{filename}/{filename}.csv', index=False)
 
     # Apply one-hot encoding to the 'bin' column
     df = pd.get_dummies(df, columns=['bin', 'time_window'], drop_first=True)
@@ -226,7 +237,18 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: set, lag: int):
     model = sm.OLS(y, X.astype(float)).fit()
 
     # Print a summary of the model
-    print(model.summary())
+    # Split the summary by lines
+    summary_text = model.summary().as_text()
+    summary_lines = summary_text.split('\n')
+
+    exclude_patterns = ['bin', 'time_window']
+    # Filter out the lines corresponding to the excluded variables
+    filtered_summary = [line for line in summary_lines if not any(pattern in line for pattern in exclude_patterns)]
+
+    # Print the filtered summary
+    filtered_summary = '\n'.join(filtered_summary)
+
+    print(filtered_summary)
 
 
 
