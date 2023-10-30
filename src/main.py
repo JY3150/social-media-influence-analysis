@@ -136,7 +136,8 @@ ts_builder = SimpleTimeSeriesBuilder(ds, space, start, end, period)
 # ts_builder = SupplyCentricMATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=3), 0)
 # ts_builder = FractionTimeSeriesConverter(ts_builder)
 #%% Agg Supply and Demand analysis
-ols_for_bins(ts_builder, {6, 11, 13}, 4)
+for combi in [[6, 9], [11, 13], [9, 13], [13, 15], [13, 17], [15, 17]]:
+    ols_for_bins(ts_builder, combi, 4)
 exit(0)
 consumer_demand = ts_builder.create_all_type_time_series(UserType.CONSUMER, "demand_in_community")
 core_node_demand = ts_builder.create_all_type_time_series(UserType.CORE_NODE, "demand_in_community")
