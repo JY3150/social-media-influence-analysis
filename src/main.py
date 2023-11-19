@@ -132,11 +132,11 @@ end = datetime(2023, 2, 1)
 period = timedelta(days=2)
 # ts_builder = SupplyCentricTimeSeriesBuilder(ds, space, start, end, period, 0)
 ts_builder = SimpleTimeSeriesBuilder(ds, space, start, end, period)
-# ts_builder = MATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=3))
+# ts_builder = MATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=4))
 # ts_builder = SupplyCentricMATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=3), 0)
 # ts_builder = FractionTimeSeriesConverter(ts_builder)
 #%% Agg Supply and Demand analysis
-for combi in [[6, 9], [11, 13], [9, 13], [13, 15], [13, 17], [15, 17]]:
+for combi in [[12, 14, 16, 18], [2, 3, 4, 5], [3, 6, 9, 12]]:
     ols_for_bins(ts_builder, combi, 4)
 exit(0)
 consumer_demand = ts_builder.create_all_type_time_series(UserType.CONSUMER, "demand_in_community")
@@ -145,65 +145,11 @@ core_node_supply = ts_builder.create_all_type_time_series(UserType.CORE_NODE, "s
 producer_supply = ts_builder.create_all_type_time_series(UserType.PRODUCER, "supply")
 demand = np.add(consumer_demand, core_node_demand)
 supply = np.add(producer_supply, core_node_supply)
-log_demand = [math.log(num) if num > 0 else 0 for num in demand]
+# log_demand = [math.log(num) if num > 0 else 0 for num in demand]
 
 #
 # demand = ts_builder.create_agg_time_series(11, 'demand_in_community')
 # supply = ts_builder.create_agg_time_series(11, "supply")
-
-n = int(3 / 4 * len(consumer_demand))
-tsample, ttarget = demand[:n], supply[:n]
-tstsample, tsttarget = demand[n:], supply[n:]
-import pandas as pd
-import statsmodels.api as sm
-data = pd.DataFrame({
-    'x': tsample,
-    'y': ttarget
-})
-lag = 3
-# Create lagged variables
-for i in range(1, lag+1):
-    data[f'x_lag_{i}'] = data['x'].shift(i)
-
-# Drop rows with NaN values introduced by the lag
-data = data.dropna()
-# Define the independent variables (including the constant term)
-X = data[[f'x_lag_{i}' for i in range(1, lag+1)]]
-
-# Define the dependent variable
-y = data['y']
-
-# Fit the OLS regression model with lagged variables
-model = sm.OLS(y, X).fit()
-
-# Get the regression results
-results = model.summary()
-
-# Print the results
-print(results)
-
-coef = [model.params[f'x_lag_{i}'] for i in range(1, lag + 1)]
-prediction = [coef[0] * tstsample[i] + coef[1] * tstsample[i - 1] + coef[2] * tstsample[i-2] for i in range(2, len(tstsample))]
-
-plt.figure()
-plt.plot(ts_builder.get_time_stamps()[n + 2:], prediction, label="prediction")
-plt.plot(ts_builder.get_time_stamps()[n + 2:], tsttarget[2:], label="target")
-plt.legend()
-plt.gcf().autofmt_xdate()
-title = "prediction and target ds, period=1"
-plt.title(title)
-plt.savefig("../results/" + title)
-
-prediction = [coef[0] * tsample[i] + coef[1] * tsample[i - 1] +
-              coef[2] * tsample[i-2] for i in range(2, len(tsample))]
-plt.figure()
-plt.plot(ts_builder.get_time_stamps()[2:len(tsample)], prediction, label="prediction")
-plt.plot(ts_builder.get_time_stamps()[2:len(tsample)], ttarget[2:], label="target")
-plt.legend()
-plt.gcf().autofmt_xdate()
-title = "prediction and target ds train, period=1"
-plt.title(title)
-plt.savefig("../results/" + title)
 
 # plot time series
 plt.figure()
@@ -218,7 +164,7 @@ plt.savefig("../results/" + title)
 # Granger Causality
 lags = list(range(-10, 11))
 plt.figure()
-gc = gc_score_for_lags(prediction, ttarget[2:], lags)
+gc = gc_score_for_lags(demand, supply, lags)
 plt.plot(lags, gc)
 plt.xticks(lags)
 plt.xlabel("lags")

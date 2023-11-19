@@ -273,20 +273,6 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int):
     #     plt.show()
 
 
-    # Define the independent variables
-    X = df[[col for col in df.columns if col.startswith('demand')] + [col for col in df.columns if col.startswith('bin_')] + [col for col in df.columns if col.startswith('time_window')]]
-
-    # Add a constant (intercept) term
-    X = sm.add_constant(X)
-
-    # Define the dependent variable
-    y = df['supply']
-
-    # Fit the linear regression model
-    model = sm.OLS(y, X.astype(float)).fit()
-
-    # Print a summary of the model
-    print(model.summary())
 
 
 
