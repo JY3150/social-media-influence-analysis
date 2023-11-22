@@ -180,7 +180,7 @@ def _list_depth(lst: Sequence) -> int:
     return 1
 
 
-def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int):
+def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int, one_core_node: bool, core_node):
     # Create suitable dataframe
     # Our dataframe will have 4 columns: demand, bin_number, time_window, and supply
     df = pd.DataFrame()
@@ -188,7 +188,7 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int):
     supply = np.array([])
     bin_number = np.array([])
     time_window = np.array([])
-    k = len(ts.time_stamps) - 1
+    k = len(ts.time_stamps)
     filename = ''
     for content_type in bins:
         if filename == '':
@@ -199,9 +199,13 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int):
         core_node_demand = ts.create_time_series(UserType.CORE_NODE, content_type, "demand_in_community")
         core_node_supply = ts.create_time_series(UserType.CORE_NODE, content_type, "supply")
         producer_supply = ts.create_time_series(UserType.PRODUCER, content_type, "supply")
-
-        demand = np.concatenate((demand, np.add(consumer_demand, core_node_demand)))
-        supply = np.concatenate((supply, np.add(producer_supply, core_node_supply)))
+        if not one_core_node:
+            demand = np.concatenate((demand, np.add(consumer_demand, core_node_demand)))
+            supply = np.concatenate((supply, np.add(producer_supply, core_node_supply)))
+        else:
+            demand = np.concatenate((demand, consumer_demand))
+            core_node_supply_one = ts.create_time_series(core_node, content_type, "demand_in_community")
+            supply = np.concatenate((supply, core_node_supply_one))
         bin_number = np.concatenate((bin_number, np.array([content_type] * k)))
         time_window = np.concatenate((time_window, np.array([i + 1 for i in range(k)])))
     df['demand'] = demand
@@ -215,11 +219,18 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int):
         df[f'supply_lag_{lag}'] = df.groupby('bin')['supply'].shift(lag)
 
     df = df.dropna()
-    try:
-        os.makedirs(f'Data/{filename}')
-    except OSError as error:
-        print(error)
-    df.to_csv(f'Data/{filename}/{filename}.csv', index=False)
+    if not one_core_node:
+        try:
+            os.makedirs(f'Data/{filename}')
+        except OSError as error:
+            print(error)
+        df.to_csv(f'Data/{filename}/{filename}.csv', index=False)
+    else:
+        try:
+            os.makedirs(f'Data/{filename}_one')
+        except OSError as error:
+            print(error)
+        df.to_csv(f'Data/{filename}_one/{filename}_one_ma.csv', index=False)
 
     # Apply one-hot encoding to the 'bin' column
     # df = pd.get_dummies(df, columns=['bin', 'time_window'], drop_first=True)
