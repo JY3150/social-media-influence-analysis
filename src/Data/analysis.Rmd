@@ -23,7 +23,7 @@ get_model <- function(model_tbl, reverse) {
   # if we don't reverse, then we are using demand to predict supply
   # so if reverse is FALSE, then we use demands as independent variables
   if(!reverse) {
-    model <- felm (supply ~ demand + demand_lag_1 + demand_lag_2 + demand_lag_3 + demand_lag_4 + demand_lag_5 + demand_lag_6 | time_window + bin, data = model_tbl)
+    model <- felm (supply ~ demand + demand_lag_1 + demand_lag_2 + demand_lag_3 + demand_lag_4 | time_window + bin, data = model_tbl)
   } else {
     model <- felm (demand ~ supply + supply_lag_1 + supply_lag_2 + supply_lag_3 + supply_lag_4 |  time_window + bin, data = model_tbl)
   }
@@ -43,62 +43,36 @@ get_model_past <- function(model_tbl, reverse) {
 
 draw_graphs <- function(model_tbl_fitted, reverse, result) {
   if(!reverse) {
-    # plot1 <- ggplot(model_tbl_fitted, aes(x = time_window, y = supply)) +
-    #   geom_line() +
-    #   facet_wrap(~bin) +
-    #   labs(title = "Supply vs Time Window",
-    #      x = "Time Window",
-    #      y = "Supply") +
-    #   theme_minimal()
-    # 
-    # plot2 <- ggplot(model_tbl_fitted, aes(x = time_window, y = fitted)) +
-    #   geom_line() +
-    #   facet_wrap(~bin) +
-    #   labs(title = "Predicted Supply vs Time Window",
-    #        x = "Time Window",
-    #        y = "Prediction") +
-    #   theme_minimal()
-    # 
-    # ggsave(file=glue('{result}_one/actual.png'), plot=plot1)
-    # ggsave(file=glue('{result}_one/prediction.png'), plot=plot2)
-    
     combined_plot <- ggplot(model_tbl_fitted, aes(x = time_window)) +
-  geom_line(aes(y = supply, color = "Supply"), linetype = "solid") +
-  geom_line(aes(y = fitted, color = "Prediction"), linetype = "solid") +
-  facet_wrap(~bin) +
-  labs(title = "Supply and Predicted Supply vs Time Window",
-       x = "Time Window",
-       y = "Value") +
-  theme_minimal()
-
-# Save the combined plot
-ggsave(file = glue('{result}_one/combined_plot_ma.png'), plot = combined_plot)
+    geom_line(aes(y = supply, color = "Supply"), linetype = "solid") +
+    geom_line(aes(y = fitted, color = "Prediction"), linetype = "solid") +
+    facet_wrap(~bin) +
+    labs(title = "Supply and Predicted Supply vs Time Window",
+         x = "Time Window",
+         y = "Value") +
+    theme_minimal()
+  
+    # Save the combined plot
+    ggsave(file = glue('{result}/combined.png'), plot = combined_plot)
   } else {
     # Assuming your data frame is named your_data
-    plot1 <- ggplot(model_tbl_fitted, aes(x = time_window, y = demand)) +
-      geom_line() +
-      facet_wrap(~bin) +
-      labs(title = "Demand vs Time Window",
+    combined_plot <- ggplot(model_tbl_fitted, aes(x = time_window)) +
+    geom_line(aes(y = supply, color = "Demand"), linetype = "solid") +
+    geom_line(aes(y = fitted, color = "Prediction"), linetype = "solid") +
+    facet_wrap(~bin) +
+    labs(title = "Demand and Predicted Demand vs Time Window",
          x = "Time Window",
-         y = "Demand") +
-      theme_minimal()
-
-    plot2 <- ggplot(model_tbl_fitted, aes(x = time_window, y = fitted)) +
-      geom_line() +
-      facet_wrap(~bin) +
-      labs(title = "Predicted Demand vs Time Window",
-           x = "Time Window",
-           y = "Prediction") +
-      theme_minimal()
-    ggsave(file=glue('{result}_one/actual_reversed.png'), plot=plot1)
-    ggsave(file=glue('{result}_one/prediction_reversed.png'), plot=plot2)
+         y = "Value") +
+    theme_minimal()
+    
+    ggsave(file = glue('{result}/combined_reversed.png'), plot = combined_plot)
   }
 }
 
 
 draw_both <- function(numbers, reverse) {
-  result <- paste(numbers, collapse = "#")
-  file_path <- glue("{result}_one/{result}_one_ma.csv")
+  result <- paste(numbers, collapse = "_")
+  file_path <- glue("{result}/{result}.csv")
   model_tbl <- read_csv(file_path)
   
   model <- get_model(model_tbl, reverse)
@@ -133,6 +107,7 @@ m_15_17 <- draw_both(c(15, 17), FALSE)
 summary_table_for_2 <- modelsummary(models = list(m_6_9, m_11_13, m_9_13, m_13_15, m_13_17, m_15_17), output="latex", 
            stars = TRUE, fmt = 4, statistic = c("std.error"), 
             coef_omit = "^topic")
+summary_table_for_2
 ```
 
 ``` {r}
@@ -145,10 +120,10 @@ m_15_17 <- draw_both(c(15, 17), TRUE)
 ```
 
 ``` {r}
-summary_table_for_2 <- modelsummary(models = list(m_6_9, m_11_13, m_9_13, m_13_15, m_13_17, m_15_17), output="latex", 
+summary_table_for_2_inverted <- modelsummary(models = list(m_6_9, m_11_13, m_9_13, m_13_15, m_13_17, m_15_17), output="latex", 
            stars = TRUE, fmt = 4, statistic = c("std.error"), 
             coef_omit = "^topic")
-summary_table_for_2
+summary_table_for_2_inverted
 ```
 
 ``` {r}
@@ -156,20 +131,12 @@ m_6_9_11 <- draw_both(c(6, 9, 11), FALSE)
 m_9_11_13 <- draw_both(c(9, 11, 13), FALSE)
 m_11_13_15 <- draw_both(c(11, 13, 15), FALSE)
 m_13_15_17 <- draw_both(c(13, 15, 17), FALSE)
-
-m_12_14_16_18 <- draw_both(c(12, 14, 16, 18), FALSE)
-m_2_3_4_5 <- draw_both(c(2,3,4,5), FALSE)
-m_3_6_9_12 <- draw_both(c(3, 6, 9, 12), FALSE)
-summary_table_for_new_4 <- modelsummary(models = list(m_12_14_16_18, m_2_3_4_5, m_3_6_9_12), output="latex", 
-           stars = TRUE, fmt = 4, statistic = c("std.error"), 
-            coef_omit = "^topic")
 ```
-
 ``` {r}
-summary_table_for_2 <- modelsummary(models = list(m_6_9_11, m_9_11_13, m_11_13_15, m_13_15_17), output="latex", 
+summary_table_for_3 <- modelsummary(models = list(m_6_9_11, m_9_11_13, m_11_13_15, m_13_15_17), output="latex", 
            stars = TRUE, fmt = 4, statistic = c("std.error"), 
             coef_omit = "^topic")
-summary_table_for_2
+summary_table_for_3
 ```
 
 ``` {r}
@@ -177,25 +144,43 @@ m_6_9_11 <- draw_both(c(6, 9, 11), TRUE)
 m_9_11_13 <- draw_both(c(9, 11, 13), TRUE)
 m_11_13_15 <- draw_both(c(11, 13, 15), TRUE)
 m_13_15_17 <- draw_both(c(13, 15, 17), TRUE)
-
 ```
-
 ``` {r}
-summary_table_for_2 <- modelsummary(models = list(m_6_9_11, m_9_11_13, m_11_13_15, m_13_15_17), output="latex", 
+summary_table_for_3_inverted <- modelsummary(models = list(m_6_9_11, m_9_11_13, m_11_13_15, m_13_15_17), output="latex", 
            stars = TRUE, fmt = 4, statistic = c("std.error"), 
             coef_omit = "^topic")
-summary_table_for_2
+summary_table_for_3_inverted
 ```
 
-``` {r}
+
+
+
+
+
+```{r}
+m_12_14_16_18 <- draw_both(c(12, 14, 16, 18), FALSE)
+m_2_3_4_5 <- draw_both(c(2,3,4,5), FALSE)
+m_3_6_9_12 <- draw_both(c(3, 6, 9, 12), FALSE)
 m_6_9_11_13 <- draw_both(c(6, 9, 11, 13), FALSE)
 m_11_13_15_17 <- draw_both(c(11, 13, 15, 17), FALSE)
-```
-
-``` {r}
-summary_table_for_2 <- modelsummary(models = list(m_6_9_11_13, m_11_13_15_17), output="latex", 
+summary_table_for_4 <- modelsummary(models = list(m_12_14_16_18, m_2_3_4_5, m_3_6_9_12, m_6_9_11_13, m_11_13_15_17), output="latex", 
            stars = TRUE, fmt = 4, statistic = c("std.error"), 
             coef_omit = "^topic")
-summary_table_for_2
+summary_table_for_4
 ```
+
+
+```{r}
+m_12_14_16_18 <- draw_both(c(12, 14, 16, 18), TRUE)
+m_2_3_4_5 <- draw_both(c(2,3,4,5), TRUE)
+m_3_6_9_12 <- draw_both(c(3, 6, 9, 12), TRUE)
+m_6_9_11_13 <- draw_both(c(6, 9, 11, 13), TRUE)
+m_11_13_15_17 <- draw_both(c(11, 13, 15, 17), TRUE)
+summary_table_for_4 <- modelsummary(models = list(m_12_14_16_18, m_2_3_4_5, m_3_6_9_12, m_6_9_11_13, m_11_13_15_17), output="latex", 
+           stars = TRUE, fmt = 4, statistic = c("std.error"), 
+            coef_omit = "^topic")
+summary_table_for_4
+```
+
+
 

@@ -63,6 +63,7 @@ class ContentDemandSupplyBuilder(BuilderBase):
         # add retweets of out community by in community
         ds.calculate_demand_out_community_by_in_community()
         ds.calculate_supply()
+
         return ds
 
     def store(self, ds: ContentDemandSupply) -> None:

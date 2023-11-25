@@ -16,7 +16,7 @@ def calculate_social_support(db_name: str, config, market: bool, alpha=1.0):
         original_tweets_collection = client[db_name][config["database"]["clean_original_tweets_collection"]]
         retweets_in_community_collection = client[db_name][config["database"]["clean_retweets_of_in_community_collection"]]
         retweets_out_community_collection = client[db_name][config["database"]["clean_retweets_of_out_community_collection"]]
-        user_info_collection = client[db_name][config["database"]["market_user_info_collection"]]
+        user_info_collection = client[db_name][config["database"]["user_info_collection"]]
     else:
         original_tweets_collection = client[db_name][config["database"]["content_space_original_tweets_collection"]]
         retweets_in_community_collection = client[db_name][config["database"]["content_space_retweets_of_in_community_collection"]]
@@ -68,9 +68,9 @@ def calculate_social_support(db_name: str, config, market: bool, alpha=1.0):
 def create_friends_dict(user_ids):
     friends = {}
     client = pymongo.MongoClient("mongodb://localhost:27017/")
-    community_info_collection = client["chess_community"]["community_info"]
+    community_info_collection = client["new_rachel_chess_content_market"]["user_info"]
     for user_id in user_ids:
-        friends_of_user_id = community_info_collection.find_one({"userid": user_id})["local following list"]
+        friends_of_user_id = community_info_collection.find_one({"user_id": user_id})["local_following"]
         friends[user_id] = [str(id) for id in friends_of_user_id]
     return friends
 
@@ -98,13 +98,13 @@ if __name__ == "__main__":
     config = json.load(config_file)
     config_file.close()
     
-    scores, ranks = calculate_social_support("chess_content_space_binning_filtered", 
-                                      config, market=False)
+    scores, ranks = calculate_social_support("new_rachel_chess_content_market",
+                                      config, market=True)
     ranked_ids = list(sorted(scores, key=lambda x: (scores[x][0], scores[x][1]), reverse=True))
     print(ranked_ids[:10])
     print([scores[ranked_id] for ranked_id in ranked_ids][:10])
     print([ranks[ranked_id] for ranked_id in ranked_ids][:10])
-    core_node_ids = [1330571318971027462, 2233129128, 23612012, 232951413, 3161912605,
+    core_node_ids = [1330571318971027456, 2233129128, 23612012, 232951413, 3161912605,
                      228806806, 132702118, 1884178352, 1067064666, 313299656]
     print([ranked_ids.index(user_id) for user_id in core_node_ids])
 

@@ -1,5 +1,7 @@
 import math
 
+import numpy.random
+
 from DAO.DAOFactory import DAOFactory
 from UserPartitioning import UserPartitioningStrategyFactory
 from Mapping.MappingFactory import MappingFactory
@@ -30,6 +32,7 @@ import json
 import pickle
 from datetime import datetime, timedelta
 import numpy as np
+np.random.seed(123)
 import matplotlib.pyplot as plt
 # import nltk
 # nltk.download('averaged_perceptron_tagger')
@@ -132,12 +135,16 @@ end = datetime(2023, 2, 1)
 period = timedelta(days=2)
 # ts_builder = SupplyCentricTimeSeriesBuilder(ds, space, start, end, period, 0)
 ts_builder = SimpleTimeSeriesBuilder(ds, space, start, end, period)
+
 # ts_builder = MATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=4))
 # ts_builder = SupplyCentricMATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=3), 0)
 # ts_builder = FractionTimeSeriesConverter(ts_builder)
 #%% Agg Supply and Demand analysis
-for combi in [[12, 14, 16, 18], [2, 3, 4, 5], [3, 6, 9, 12]]:
-    ols_for_bins(ts_builder, combi, 4)
+# for combi in [[6, 9], [9, 13], [11, 13], [13, 15], [13, 17], [15, 17], [6, 9, 11], [9, 11, 13], [11, 13, 15], [13, 15, 17], [2, 3, 4, 5], [3, 6, 9, 12], [6, 9, 11, 13], [11, 13, 15, 17], [12, 14, 16, 18]]:
+#     ols_for_bins(ts_builder, combi, 4, True, None)
+# exit(0)
+for combi in [[11, 13]]:
+    ols_for_bins(ts_builder, combi, 4, True, None)
 exit(0)
 consumer_demand = ts_builder.create_all_type_time_series(UserType.CONSUMER, "demand_in_community")
 core_node_demand = ts_builder.create_all_type_time_series(UserType.CORE_NODE, "demand_in_community")

@@ -180,7 +180,7 @@ def _list_depth(lst: Sequence) -> int:
     return 1
 
 
-def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int, one_core_node: bool, core_node):
+def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int, aggregate: bool, core_node):
     # Create suitable dataframe
     # Our dataframe will have 4 columns: demand, bin_number, time_window, and supply
     df = pd.DataFrame()
@@ -188,24 +188,29 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int, one_core_node:
     supply = np.array([])
     bin_number = np.array([])
     time_window = np.array([])
-    k = len(ts.time_stamps)
+    k = len(ts.time_stamps) - 1
     filename = ''
     for content_type in bins:
         if filename == '':
             filename += str(content_type)
         else:
-            filename += '#' + str(content_type)
+            filename += '_' + str(content_type)
         consumer_demand = ts.create_time_series(UserType.CONSUMER, content_type, "demand_in_community")
         core_node_demand = ts.create_time_series(UserType.CORE_NODE, content_type, "demand_in_community")
         core_node_supply = ts.create_time_series(UserType.CORE_NODE, content_type, "supply")
+
         producer_supply = ts.create_time_series(UserType.PRODUCER, content_type, "supply")
-        if not one_core_node:
+        if aggregate:
             demand = np.concatenate((demand, np.add(consumer_demand, core_node_demand)))
             supply = np.concatenate((supply, np.add(producer_supply, core_node_supply)))
         else:
-            demand = np.concatenate((demand, consumer_demand))
-            core_node_supply_one = ts.create_time_series(core_node, content_type, "demand_in_community")
-            supply = np.concatenate((supply, core_node_supply_one))
+            if core_node is not None:
+                demand = np.concatenate((demand, consumer_demand))
+                core_node_supply_one = ts.create_time_series(core_node, content_type, "supply")
+                supply = np.concatenate((supply, core_node_supply_one))
+            else:
+                demand = np.concatenate((demand, consumer_demand))
+                supply = np.concatenate((supply, core_node_supply))
         bin_number = np.concatenate((bin_number, np.array([content_type] * k)))
         time_window = np.concatenate((time_window, np.array([i + 1 for i in range(k)])))
     df['demand'] = demand
@@ -219,18 +224,26 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int, one_core_node:
         df[f'supply_lag_{lag}'] = df.groupby('bin')['supply'].shift(lag)
 
     df = df.dropna()
-    if not one_core_node:
-        try:
-            os.makedirs(f'Data/{filename}')
-        except OSError as error:
-            print(error)
-        df.to_csv(f'Data/{filename}/{filename}.csv', index=False)
+    if core_node is None:
+        if aggregate:
+            try:
+                os.makedirs(f'Data/{filename}')
+            except OSError as error:
+                print(error)
+            df.to_csv(f'Data/{filename}/{filename}.csv', index=False)
+        else:
+            try:
+                os.makedirs(f'Data/{filename}_cns')
+            except OSError as error:
+                print(error)
+            df.to_csv(f'Data/{filename}_cns/{filename}_cns.csv', index=False)
+
     else:
         try:
             os.makedirs(f'Data/{filename}_one')
         except OSError as error:
             print(error)
-        df.to_csv(f'Data/{filename}_one/{filename}_one_ma.csv', index=False)
+        df.to_csv(f'Data/{filename}_one/{filename}_one.csv', index=False)
 
     # Apply one-hot encoding to the 'bin' column
     # df = pd.get_dummies(df, columns=['bin', 'time_window'], drop_first=True)
