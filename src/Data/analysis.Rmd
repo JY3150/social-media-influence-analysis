@@ -53,7 +53,7 @@ draw_graphs <- function(model_tbl_fitted, reverse, result) {
     theme_minimal()
   
     # Save the combined plot
-    ggsave(file = glue('{result}/combined.png'), plot = combined_plot)
+    ggsave(file = glue('{result}_one_chess/combined.png'), plot = combined_plot)
   } else {
     # Assuming your data frame is named your_data
     combined_plot <- ggplot(model_tbl_fitted, aes(x = time_window)) +
@@ -65,14 +65,14 @@ draw_graphs <- function(model_tbl_fitted, reverse, result) {
          y = "Value") +
     theme_minimal()
     
-    ggsave(file = glue('{result}/combined_reversed.png'), plot = combined_plot)
+    ggsave(file = glue('{result}_one_chess/combined_reversed.png'), plot = combined_plot)
   }
 }
 
 
 draw_both <- function(numbers, reverse) {
   result <- paste(numbers, collapse = "_")
-  file_path <- glue("{result}/{result}.csv")
+  file_path <- glue("{result}_one_chess/{result}_one.csv")
   model_tbl <- read_csv(file_path)
   
   model <- get_model(model_tbl, reverse)
@@ -104,7 +104,7 @@ m_15_17 <- draw_both(c(15, 17), FALSE)
 ```
 
 ``` {r}
-summary_table_for_2 <- modelsummary(models = list(m_6_9, m_11_13, m_9_13, m_13_15, m_13_17, m_15_17), output="latex", 
+summary_table_for_2 <- modelsummary(models = list( m_11_13, m_9_13, m_13_15, m_13_17), output="latex", 
            stars = TRUE, fmt = 4, statistic = c("std.error"), 
             coef_omit = "^topic")
 summary_table_for_2
@@ -163,7 +163,7 @@ m_2_3_4_5 <- draw_both(c(2,3,4,5), FALSE)
 m_3_6_9_12 <- draw_both(c(3, 6, 9, 12), FALSE)
 m_6_9_11_13 <- draw_both(c(6, 9, 11, 13), FALSE)
 m_11_13_15_17 <- draw_both(c(11, 13, 15, 17), FALSE)
-summary_table_for_4 <- modelsummary(models = list(m_12_14_16_18, m_2_3_4_5, m_3_6_9_12, m_6_9_11_13, m_11_13_15_17), output="latex", 
+summary_table_for_4 <- modelsummary(models = list(m_12_14_16_18, m_3_6_9_12, m_6_9_11_13, m_11_13_15_17), output="latex", 
            stars = TRUE, fmt = 4, statistic = c("std.error"), 
             coef_omit = "^topic")
 summary_table_for_4

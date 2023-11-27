@@ -75,8 +75,8 @@ if not MARKET_SKIP:
         if MARKET_STORE:
             market_builder.store(market)
 
-# core_node_id = 18104734
-# market.preserve_core_node(core_node_id)
+core_node_id = 18104734
+market.preserve_core_node(core_node_id)
 
 #%% ######################### Build Content Space #########################
 if not SPACE_SKIP:
@@ -89,9 +89,10 @@ if not SPACE_SKIP:
         mapping = mapping_factory.get_cluster({
             "num_clusters": config["num_clusters"],
             "embeddings": market_dao.load_tweet_embeddings(),
-            # "words": ["chess"],
+            "words": ["machine", "learn", "data", "model"],
             "num_bins": config["num_bins"],
-            "market": market
+            "market": market,
+            "dao": market_dao
         })
         mapping.generate_tweet_to_type()
         pickle.dump(mapping, open("binning_mapping.pkl", "wb"))
@@ -132,54 +133,59 @@ else:
 #%% ######################### Build Time Series #########################
 start = datetime(2020, 9, 1)
 end = datetime(2023, 2, 1)
-period = timedelta(days=2)
-# ts_builder = SupplyCentricTimeSeriesBuilder(ds, space, start, end, period, 0)
-ts_builder = SimpleTimeSeriesBuilder(ds, space, start, end, period)
+period = timedelta(days=7)
+ts_builder = SupplyCentricTimeSeriesBuilder(ds, space, start, end, period, 0)
+# ts_builder = SimpleTimeSeriesBuilder(ds, space, start, end, period)
 
 # ts_builder = MATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=4))
 # ts_builder = SupplyCentricMATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=3), 0)
 # ts_builder = FractionTimeSeriesConverter(ts_builder)
+ols_for_word(ts_builder, 4)
 #%% Agg Supply and Demand analysis
 # for combi in [[6, 9], [9, 13], [11, 13], [13, 15], [13, 17], [15, 17], [6, 9, 11], [9, 11, 13], [11, 13, 15], [13, 15, 17], [2, 3, 4, 5], [3, 6, 9, 12], [6, 9, 11, 13], [11, 13, 15, 17], [12, 14, 16, 18]]:
-#     ols_for_bins(ts_builder, combi, 4, True, None)
-# exit(0)
-for combi in [[11, 13]]:
-    ols_for_bins(ts_builder, combi, 4, True, None)
+#     ols_for_bins(ts_builder, combi, 4, False, 23612012)
 exit(0)
-consumer_demand = ts_builder.create_all_type_time_series(UserType.CONSUMER, "demand_in_community")
-core_node_demand = ts_builder.create_all_type_time_series(UserType.CORE_NODE, "demand_in_community")
-core_node_supply = ts_builder.create_all_type_time_series(UserType.CORE_NODE, "supply")
-producer_supply = ts_builder.create_all_type_time_series(UserType.PRODUCER, "supply")
-demand = np.add(consumer_demand, core_node_demand)
-supply = np.add(producer_supply, core_node_supply)
-# log_demand = [math.log(num) if num > 0 else 0 for num in demand]
+consumer_demand = ts_builder.create_time_series(UserType.CONSUMER, 1, "demand_in_community")
+core_node_demand = ts_builder.create_time_series(UserType.CORE_NODE, 1, "demand_in_community")
+core_node_supply = ts_builder.create_time_series(UserType.CORE_NODE, 1, "supply")
+producer_supply = ts_builder.create_time_series(UserType.PRODUCER, 1, "supply")
 
-#
-# demand = ts_builder.create_agg_time_series(11, 'demand_in_community')
-# supply = ts_builder.create_agg_time_series(11, "supply")
+
+# consumer_demand = ts_builder.create_all_type_time_series(UserType.CONSUMER, "demand_in_community")
+# core_node_demand = ts_builder.create_all_type_time_series(UserType.CORE_NODE, "demand_in_community")
+# core_node_supply = ts_builder.create_all_type_time_series(UserType.CORE_NODE, "supply")
+# producer_supply = ts_builder.create_all_type_time_series(UserType.PRODUCER, "supply")
+
+
+# demand = np.add(consumer_demand, core_node_demand)
+# supply = np.add(producer_supply, core_node_supply)
+
+
 
 # plot time series
 plt.figure()
-plt.plot(ts_builder.get_time_stamps(), demand, label="demand")
-plt.plot(ts_builder.get_time_stamps(), supply, label="supply")
+plt.plot(ts_builder.get_time_stamps(), consumer_demand, label="consumer_demand")
+plt.plot(ts_builder.get_time_stamps(), core_node_demand, label="core_node_demand")
+plt.plot(ts_builder.get_time_stamps(), core_node_supply, label="core_node_supply")
+plt.plot(ts_builder.get_time_stamps(), producer_supply, label="producer_supply")
 plt.legend()
 plt.gcf().autofmt_xdate()
-title = "Aggregate Supply and Demand MAF"
+title = "Supply and Demand Best Result Tom"
 plt.title(title)
 plt.savefig("../results/" + title)
 
 # Granger Causality
-lags = list(range(-10, 11))
-plt.figure()
-gc = gc_score_for_lags(demand, supply, lags)
-plt.plot(lags, gc)
-plt.xticks(lags)
-plt.xlabel("lags")
-plt.ylabel("p-value")
-plt.axhline(y=0.05, color="red", linestyle="--")
-title = "granger causality for prediction and target"
-plt.title(title)
-plt.savefig("../results/" + title)
+# lags = list(range(-10, 11))
+# plt.figure()
+# gc = gc_score_for_lags(demand, supply, lags)
+# plt.plot(lags, gc)
+# plt.xticks(lags)
+# plt.xlabel("lags")
+# plt.ylabel("p-value")
+# plt.axhline(y=0.05, color="red", linestyle="--")
+# title = "granger causality for prediction and target"
+# plt.title(title)
+# plt.savefig("../results/" + title)
 
 # Results for structural properties
 from analysis import original_tweets_to_retweets_ratio, plot_social_support_rank_and_value, \

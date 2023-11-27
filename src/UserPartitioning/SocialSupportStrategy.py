@@ -6,12 +6,12 @@ from User.UserBase import UserBase
 #                   4369711156, 1884178352, 1651411087, 126345156, 232951413,
 #                   277594186, 313299656, 186797066, 92284830, 1729528081, 13247182]
 
-# # Choose the top 10
+# Choose the top 10
 core_node_list = [23612012, 3161912605,
                   227629567, 919900711, 301042394, 228660231,
                   4369711156, 1651411087, 232951413,
                   277594186]
-
+# core_node_list = [23612012]
 
 class SocialSupportStrategy(UserPartitioningStrategy):
     """Classifies user as a producer, consumer, or core node

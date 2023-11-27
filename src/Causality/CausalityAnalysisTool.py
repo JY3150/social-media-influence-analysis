@@ -240,62 +240,42 @@ def ols_for_bins(ts: TimeSeriesBuilderBase, bins: List, lag: int, aggregate: boo
 
     else:
         try:
-            os.makedirs(f'Data/{filename}_one')
+            os.makedirs(f'Data/{filename}_one_chess')
         except OSError as error:
             print(error)
-        df.to_csv(f'Data/{filename}_one/{filename}_one.csv', index=False)
+        df.to_csv(f'Data/{filename}_one_chess/{filename}_one.csv', index=False)
 
-    # Apply one-hot encoding to the 'bin' column
-    # df = pd.get_dummies(df, columns=['bin', 'time_window'], drop_first=True)
-    # if not reverse:
-    #
-    #     # Define the independent variables
-    #     X = df[[col for col in df.columns if col.startswith('demand')]
-    #            + [col for col in df.columns if col.startswith('bin_')]
-    #            + [col for col in df.columns if col.startswith('time_window')]
-    #            + [col for col in df.columns if col.startswith('supply_lag')]]
-    #
-    #     # Add a constant (intercept) term
-    #     X = sm.add_constant(X)
-    #
-    #     # Define the dependent variable
-    #     y = df['supply']
-    # else:
-    #     # Define the independent variables
-    #     X = df[[col for col in df.columns if col.startswith('supply')]
-    #            + [col for col in df.columns if col.startswith('bin_')]
-    #            + [col for col in df.columns if col.startswith('time_window')]]
-    #
-    #     # Add a constant (intercept) term
-    #     X = sm.add_constant(X)
-    #
-    #     # Define the dependent variable
-    #     y = df['supply']
-    #
-    # # Fit the linear regression model
-    # model = sm.OLS(y, X.astype(float)).fit()
-    #
-    # # Print a summary of the model
-    # summary_lines = model.summary().as_text()
-    # exclude_patterns = ['bin', 'time_window']
-    # # Filter out the lines corresponding to the excluded variables
-    # filtered_summary = [line for line in summary_lines.split('\n') if not any(pattern in line for pattern in exclude_patterns)]
-    #
-    # # Print the filtered summary
-    # filtered_summary = '\n'.join(filtered_summary)
-    # print(filtered_summary)
-    # time_span = [i + 1 for i in range(7, k)]
-    # for content_type in bins:
-    #     model_tbl = df[df[f'bin_{content_type}.0']]
-    #     prediction = model.predict(model_tbl)
-    #     actual = model_tbl['supply']
-    #     plt.plot(time_span, prediction)
-    #     plt.title(f'prediction on bin {content_type}')
-    #     plt.show()
-    #     plt.plot(time_span, actual)
-    #     plt.title(f'actual values on bin {content_type}')
-    #     plt.show()
 
+def ols_for_word(ts: TimeSeriesBuilderBase, lag: int):
+    # Create suitable dataframe
+    # Our dataframe will have 4 columns: demand, bin_number, time_window, and supply
+    df = pd.DataFrame()
+    consumer_demand = ts.create_time_series(UserType.CONSUMER, 1, "demand_in_community")
+    core_node_demand = ts.create_time_series(UserType.CORE_NODE, 1, "demand_in_community")
+    core_node_supply = ts.create_time_series(UserType.CORE_NODE, 1, "supply")
+    producer_supply = ts.create_time_series(UserType.PRODUCER, 1, "supply")
+    time_window = np.array([i for i in range(len(consumer_demand))])
+
+    df['consumer_demand'] = consumer_demand
+    df['producer_supply'] = producer_supply
+    df['core_node_demand'] = core_node_demand
+    df['core_node_supply'] = core_node_supply
+    df['time_window'] = time_window
+
+    # create lagged values for the bin
+    for lag in range(1, lag + 1):
+        df[f'consumer_demand_lag_{lag}'] = df['consumer_demand'].shift(lag)
+        df[f'producer_supply_lag_{lag}'] = df['producer_supply'].shift(lag)
+        df[f'core_node_demand_{lag}'] = df['core_node_demand'].shift(lag)
+        df[f'core_node_supply_{lag}'] = df['core_node_supply'].shift(lag)
+
+    df = df.dropna()
+
+    try:
+        os.makedirs(f'Data/ml_1_single_core_node')
+    except OSError as error:
+        print(error)
+    df.to_csv(f'Data/ml_1_single_core_node/one.csv', index=False)
 
 
 

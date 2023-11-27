@@ -58,9 +58,10 @@ class ContentMarket(AggregationBase):
     def preserve_core_node(self, user_id: int) -> None:
         # get desired user id list
         core_node = self.get_user(user_id)
-        follower_list = self._str_to_int_list(core_node.local_followers) # demand
-        following_list = self._str_to_int_list(core_node.local_following) # supply
-
+        # follower_list = self._str_to_int_list(core_node.local_followers) # demand
+        # following_list = self._str_to_int_list(core_node.local_following) # supply
+        following_list = core_node.local_following
+        follower_list = core_node.local_followers
         # remove users
         # 1. remove core nodes
         self.core_nodes.add(core_node)
@@ -82,6 +83,7 @@ class ContentMarket(AggregationBase):
         # remove retweets
         _remove_retweets([user_id] + following_list, self.retweets_of_in_comm)
         _remove_retweets([user_id] + following_list, self.retweets_of_out_comm)
+        # _remove_retweets([user_id] + following_list, self.retweets_of_out_comm_by_in_comm)
 
     def _str_to_int_list(self, lst: List[str]) -> List[int]:
         """Convert a str list to int list."""
