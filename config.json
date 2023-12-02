@@ -3,7 +3,7 @@
     "db_type": "Mongo",
     "connection_url": "mongodb://localhost:27017/",
 
-    "community_db_name": "ml_community_1",
+    "community_db_name": "rachel_chess_community",
     "community_info_collection": "user_info",
     "user_info_collection": "user_info",
     "original_tweets_collection": "original_tweets",
@@ -13,7 +13,7 @@
     "retweets_of_out_community_collection": "retweets_of_out_community",
     "retweets_of_out_community_by_in_community_collection": "retweets_of_out_community_by_in_community", 
 
-    "content_market_db_name": "ml_community_1",
+    "content_market_db_name": "new_rachel_chess_content_market",
     "clean_original_tweets_collection": "original_tweets",
     "clean_replies_collection": "clean_replies",
     "clean_quotes_of_in_community_collection": "clean_quotes_of_in_community",
@@ -38,7 +38,7 @@
   },
   "num_clusters": 20,
   "num_bins": 20,
-  "partitioning_strategy": "users",
+  "partitioning_strategy": "social_support",
   "embedding_type": "tweet2vec",
-  "content_type_method": "word_any"
+  "content_type_method": "binning"
 }

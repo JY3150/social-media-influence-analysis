@@ -75,8 +75,8 @@ if not MARKET_SKIP:
         if MARKET_STORE:
             market_builder.store(market)
 
-core_node_id = 18104734
-market.preserve_core_node(core_node_id)
+# core_node_id = 18104734
+# market.preserve_core_node(core_node_id)
 
 #%% ######################### Build Content Space #########################
 if not SPACE_SKIP:
@@ -133,17 +133,17 @@ else:
 #%% ######################### Build Time Series #########################
 start = datetime(2020, 9, 1)
 end = datetime(2023, 2, 1)
-period = timedelta(days=7)
-ts_builder = SupplyCentricTimeSeriesBuilder(ds, space, start, end, period, 0)
-# ts_builder = SimpleTimeSeriesBuilder(ds, space, start, end, period)
+period = timedelta(days=2)
+# ts_builder = SupplyCentricTimeSeriesBuilder(ds, space, start, end, period, 0)
+ts_builder = SimpleTimeSeriesBuilder(ds, space, start, end, period)
 
 # ts_builder = MATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=4))
 # ts_builder = SupplyCentricMATimeSeriesBuilder(ds, space, start, end, period, timedelta(days=3), 0)
 # ts_builder = FractionTimeSeriesConverter(ts_builder)
-ols_for_word(ts_builder, 4)
+# ols_for_word(ts_builder, 10)
 #%% Agg Supply and Demand analysis
-# for combi in [[6, 9], [9, 13], [11, 13], [13, 15], [13, 17], [15, 17], [6, 9, 11], [9, 11, 13], [11, 13, 15], [13, 15, 17], [2, 3, 4, 5], [3, 6, 9, 12], [6, 9, 11, 13], [11, 13, 15, 17], [12, 14, 16, 18]]:
-#     ols_for_bins(ts_builder, combi, 4, False, 23612012)
+for combi in [[6, 9], [9, 13], [11, 13], [13, 15], [13, 17], [15, 17], [6, 9, 11], [9, 11, 13], [11, 13, 15], [13, 15, 17], [2, 3, 4, 5], [3, 6, 9, 12], [6, 9, 11, 13], [11, 13, 15, 17], [12, 14, 16, 18]]:
+    ols_for_bins(ts_builder, combi, 7, False, None)
 exit(0)
 consumer_demand = ts_builder.create_time_series(UserType.CONSUMER, 1, "demand_in_community")
 core_node_demand = ts_builder.create_time_series(UserType.CORE_NODE, 1, "demand_in_community")

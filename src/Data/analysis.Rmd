@@ -44,16 +44,16 @@ get_model_past <- function(model_tbl, reverse) {
 draw_graphs <- function(model_tbl_fitted, reverse, result) {
   if(!reverse) {
     combined_plot <- ggplot(model_tbl_fitted, aes(x = time_window)) +
-    geom_line(aes(y = supply, color = "Supply"), linetype = "solid") +
+    geom_line(aes(y = core_node_supply, color = "Core Node Supply"), linetype = "solid") +
     geom_line(aes(y = fitted, color = "Prediction"), linetype = "solid") +
     facet_wrap(~bin) +
-    labs(title = "Supply and Predicted Supply vs Time Window",
+    labs(title = "Core Node Supply and Predicted Supply vs Time Window",
          x = "Time Window",
          y = "Value") +
     theme_minimal()
   
     # Save the combined plot
-    ggsave(file = glue('{result}_one_chess/combined.png'), plot = combined_plot)
+    ggsave(file = glue('ml_1_single_core_node/combined.png'), plot = combined_plot)
   } else {
     # Assuming your data frame is named your_data
     combined_plot <- ggplot(model_tbl_fitted, aes(x = time_window)) +
@@ -72,7 +72,7 @@ draw_graphs <- function(model_tbl_fitted, reverse, result) {
 
 draw_both <- function(numbers, reverse) {
   result <- paste(numbers, collapse = "_")
-  file_path <- glue("{result}_one_chess/{result}_one.csv")
+  file_path <- glue("{result}_cns/{result}_cns.csv")
   model_tbl <- read_csv(file_path)
   
   model <- get_model(model_tbl, reverse)
@@ -81,7 +81,7 @@ draw_both <- function(numbers, reverse) {
 
   model_tbl_fitted$fitted <- model$fitted.values
 
-  draw_graphs(model_tbl_fitted, reverse, result)
+  # draw_graphs(model_tbl_fitted, reverse, result)
   
   return(model)
 }
@@ -182,5 +182,146 @@ summary_table_for_4 <- modelsummary(models = list(m_12_14_16_18, m_2_3_4_5, m_3_
 summary_table_for_4
 ```
 
+```{r}
+  file <- "13_15_17_cns"
+  file_path <- glue("{file}/{file}.csv")
+  model_tbl <- read_csv(file_path)
+  results <- list()
+  
+  model <- felm (supply ~ demand | time_window + bin, data = model_tbl)
+  results <- c(results, coef(summary(model))[4])
+  
+  model <- felm (supply ~ demand_lag_1 | time_window + bin, data = model_tbl)
+  results <- c(results, coef(summary(model))[4])
+  
+  model <- felm (supply ~ demand_lag_2 | time_window + bin, data = model_tbl)
+  results <- c(results, coef(summary(model))[4])
+  
+  model <- felm (supply ~ demand_lag_3 | time_window + bin, data = model_tbl)
+  results <- c(results, coef(summary(model))[4])
+  
+  model <- felm (supply ~ demand_lag_4 | time_window + bin, data = model_tbl)
+  results <- c(results, coef(summary(model))[4])
+  
+  model <- felm (supply ~ demand_lag_5 | time_window + bin, data = model_tbl)
+  results <- c(results, coef(summary(model))[4])
+  
+  model <- felm (supply ~ demand_lag_6 | time_window + bin, data = model_tbl)
+  results <- c(results, coef(summary(model))[4])
+  
+  model <- felm (supply ~ demand_lag_7 | time_window + bin, data = model_tbl)
+  results <- c(results, coef(summary(model))[4])
+  
+  
+  ########################################################
+  nresults <- list()
+  model <- felm (demand ~ supply | time_window + bin, data = model_tbl)
+  nresults <- c(nresults, coef(summary(model))[4])
+  
+  model <- felm (demand ~ supply_lag_1 | time_window + bin, data = model_tbl)
+  nresults <- c(nresults, coef(summary(model))[4])
+  
+  model <- felm (demand ~ supply_lag_2 | time_window + bin, data = model_tbl)
+  nresults <- c(nresults, coef(summary(model))[4])
+
+  model <- felm (demand ~ supply_lag_3 | time_window + bin, data = model_tbl)
+  nresults <- c(nresults, coef(summary(model))[4])
+  
+  model <- felm (demand ~ supply_lag_4 | time_window + bin, data = model_tbl)
+  nresults <- c(nresults, coef(summary(model))[4])
+  
+  model <- felm (demand ~ supply_lag_5 | time_window + bin, data = model_tbl)
+  nresults <- c(nresults, coef(summary(model))[4])
+  
+  model <- felm (demand ~ supply_lag_6 | time_window + bin, data = model_tbl)
+  nresults <- c(nresults, coef(summary(model))[4])
+  
+  model <- felm (demand ~ supply_lag_7 | time_window + bin, data = model_tbl)
+  nresults <- c(nresults, coef(summary(model))[4])
+  
+  data <- data.frame(
+    x = c(0, 1, 2, 3, 4, 5, 6, 7 ),
+    positive = unlist(results),
+    negative = unlist(nresults)
+  )
+
+  
+    combined_plot <- ggplot(data, aes(x = x)) +
+  geom_line(aes(y = positive, color="positive"), linetype = "solid", color = "blue") +
+  geom_line(aes(y = negative, color="negative"), linetype = "solid", color = "red") +
+  labs(title = "p-value trends",
+       x = "lag",
+       y = "p-Value") +
+  theme_minimal()+ 
+ annotate(
+    "text",
+    x = Inf, y = Inf,
+    label = "Blue: Positive, Red: Negative",
+    hjust = 1, vjust = 1,
+    size = 4,
+    color = "black"
+  )
+    
+    combined_plot
+  
+  ggsave(file = glue('{file}/p_trend.png'), plot = combined_plot)
+```
 
 
+
+```{r}
+  file <- "11_13_15_17_cns"
+  file_path <- glue("{file}/{file}.csv")
+  model_tbl <- read_csv(file_path)
+  
+  
+  model <- felm (supply ~ demand | time_window + bin, data = model_tbl)
+  print(model$pval)
+  model <- felm (supply ~ demand + demand_lag_1| time_window + bin, data = model_tbl)
+  print(model$pval)
+  model <- felm (supply ~ demand + demand_lag_1 + demand_lag_2| time_window + bin, data = model_tbl)
+  print(model$pval)
+  model <- felm (supply ~ demand + demand_lag_1 + demand_lag_2 + demand_lag_3| time_window + bin, data = model_tbl)
+  print(model$pval)
+  model <- felm (supply ~ demand + demand_lag_1 + demand_lag_2 + demand_lag_3 + demand_lag_4| time_window + bin, data = model_tbl)
+  print(model$pval)
+  model <- felm (supply ~ demand + demand_lag_1 + demand_lag_2 + demand_lag_3 + demand_lag_4 + demand_lag_5| time_window + bin, data = model_tbl)
+  print(model$pval)
+  model <- felm (supply ~ demand + demand_lag_1 + demand_lag_2 + demand_lag_3 + demand_lag_4 + demand_lag_5 + demand_lag_6| time_window + bin, data = model_tbl)
+  print(model$pval)
+  model <- felm (supply ~ demand + demand_lag_1 + demand_lag_2 + demand_lag_3 + demand_lag_4 + demand_lag_5 + demand_lag_6 + demand_lag_7| time_window + bin, data = model_tbl)
+  print(model$pval)
+
+```
+
+
+```{r}
+
+# P-values for different lags and variables
+p_values <- c(
+  1.246805e-18, NA, NA, NA, NA, NA, NA, NA,
+  8.220184e-18, 1.390632e-01, NA, NA, NA, NA, NA, NA,
+  1.726298e-17, 1.615241e-01, 4.857248e-01, NA, NA, NA, NA, NA,
+  8.076976e-17, 2.254747e-01, 6.451610e-01, 1.484407e-02, NA, NA, NA, NA,
+  1.239533e-16, 2.971917e-01, 7.801028e-01, 2.757481e-02, 1.538258e-02, NA, NA, NA,
+  1.855154e-16, 3.069884e-01, 8.242516e-01, 3.271701e-02, 1.974749e-02, 3.826342e-01, NA, NA,
+  2.415688e-16, 3.124892e-01, 8.283182e-01, 3.435645e-02, 2.104274e-02, 3.974287e-01, 8.034805e-01, NA,
+  1.387890e-16, 2.745849e-01, 7.861524e-01, 3.226292e-02, 1.672569e-02, 3.430190e-01, 7.048256e-01, 1.406432e-01
+)
+
+# Reshape the data into a matrix
+p_values_matrix <- matrix(p_values, nrow = 8, byrow = TRUE)
+
+# Convert the matrix into a data frame
+p_values_df <- as.data.frame(p_values_matrix)
+
+# Adding column and row names
+colnames(p_values_df) <- c("lag_0", "lag_1", "lag_2", "lag_3", "lag_4", "lag_5", "lag_6", "lag_7")
+rownames(p_values_df) <- c(1, 2, 3, 4, 5, 6, 7, 8)
+
+
+# Printing the data frame
+print(p_values_df)
+
+
+```
